@@ -1,8 +1,8 @@
 <h1 align="center">
-    SERVIDOR HTTP
+    SERVIDOR WEB
 </h1>
 
-# SERVIDOR FTP
+# SERVIDOR WEB
 Implementação de um servidor ftp em linguagem C. 
 
 <p align="center">
@@ -21,15 +21,15 @@ Esse projeto foi desenvolvido com as seguintes tecnologias:
 
 ## 💻 Projeto
  
-Implementação de um servidor ftp em linguagem C. 
+Implementação de um servidor web em linguagem C. 
 
 
 
 ## Começando
 
- 1. Clone esse repositorio ```git clone https://github.com/Rodrigo-Segui/ServidorFTP.git```
+ 1. Clone esse repositorio ```git clone https://github.com/Rodrigo-Segui/ServidorWeb.git```
  2. Inicie  com projeto e compile.
   
  ## :memo: Licença
 
-Esse projeto está sob a licença MIT. Veja o arquivo [LICENSE](https://github.com/Rodrigo-Segui/ServidorFTP/blob/master/LICENSE) para mais detalhes
+Esse projeto está sob a licença MIT. Veja o arquivo [LICENSE](https://github.com/Rodrigo-Segui/ServidorWeb/blob/master/LICENSE) para mais detalhes
