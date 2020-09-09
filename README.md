@@ -1,5 +1,5 @@
 <h1 align="center">
-    SERVIDOR FTP
+    SERVIDOR HTTP
 </h1>
 
 # SERVIDOR FTP
