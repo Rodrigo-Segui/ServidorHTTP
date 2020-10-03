@@ -3,7 +3,7 @@
 </h1>
 
 # SERVIDOR WEB
-Implementação de um servidor ftp em linguagem C. 
+Implementação de um servidor web em linguagem C. 
 
 <p align="center">
   <a href="#rocket-tecnologias">Tecnologias</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
