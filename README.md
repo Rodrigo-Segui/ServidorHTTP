@@ -21,7 +21,7 @@ Esse projeto foi desenvolvido com as seguintes tecnologias:
 
 ## 💻 Projeto
  
-Implementação de um servidor web em linguagem C. 
+Implementação servidor web em linguagem C. 
 
 
 
