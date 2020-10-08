@@ -14,7 +14,7 @@ Implementação de um servidor web em linguagem C.
 
 ## :rocket: Tecnologias
 
-Esse projeto foi desenvolvido com as seguintes tecnologias:
+Esse projeto foi desenvolvido em:
 
 - [Linguagem C](https://devdocs.io/c/)
 
