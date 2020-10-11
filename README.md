@@ -1,5 +1,5 @@
 <h1 align="center">
-    SERVIDOR WEB
+    SERVIDOR HTTP COM Pthreads
 </h1>
 
 # SERVIDOR WEB
