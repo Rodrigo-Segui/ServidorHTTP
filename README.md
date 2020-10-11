@@ -2,7 +2,7 @@
     SERVIDOR HTTP COM Pthreads
 </h1>
 
-# SERVIDOR WEB
+# SERVIDOR HTPP COM Pthreads
 Implementação de um servidor web em linguagem C. 
 
 <p align="center">
@@ -32,4 +32,4 @@ Implementação servidor web em linguagem C.
   
  ## :memo: Licença
 
-Esse projeto está sob a licença MIT. Veja o arquivo [LICENSE](https://github.com/Rodrigo-Segui/ServidorWeb/blob/master/LICENSE) para mais detalhes
+Esse projeto está sob a licença MIT. Veja o arquivo [LICENSE](https://github.com/Rodrigo-Segui/ServidorHTTP/blob/master/LICENSE) para mais detalhes
