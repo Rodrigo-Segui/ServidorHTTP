@@ -9,6 +9,15 @@
  
 int main(int argc, char const *argv[])
 {
+   // struct requisicoes req{
+     //   .ip = "42734987234",
+       // .message = "hello"    
+    //};
+    
+
+
+    //char *message = "HTTP/1.0 400 Bad Request\r\nConnection: close\r\n\r\n<!doctype html><html><body>400 Bad Request. (You need to request to jpeg and html files)</body></html>";
+    char *message = "GET /peruano.css HTTP/1.0,10.3.6.225";
     struct sockaddr_in address;
     int sock = 0, valread;
     struct sockaddr_in serv_addr;
@@ -37,7 +46,11 @@ int main(int argc, char const *argv[])
         printf("\nConnection Failed \n");
         return -1;
     }
-    send(sock , hello , strlen(hello) , 0 );
+    // aparece aqui 
+    send(sock , message , strlen(message) , 0 );
+
+
+    
     printf("Hello message sent\n");
     valread = read( sock , buffer, 1024);
     printf("%s\n",buffer );

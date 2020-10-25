@@ -7,9 +7,11 @@
 #define PORT 8080
 int main(int argc, char const *argv[])
 {
-    int socket_servidor, socket_cliente, valread;
+    int socket_servidor, socket_cliente;
+    int valread;
     int opt = 1;
     char buffer[1024] = {0};
+
     char *hello = "Hello from server";
     
     struct sockaddr_in address = {
@@ -19,8 +21,6 @@ int main(int argc, char const *argv[])
     };
 
     int addrlen = sizeof(address);
-
-
      
     // criando o socket - funcao socket
     //int socket(int domain, int type, int protocol)
@@ -65,21 +65,62 @@ int main(int argc, char const *argv[])
     }
 
     while(1){
-
         printf("\n-----Aguardando por uma nova conexão-----\n");
         //funcao accept  espera por conecoes
         socket_cliente = accept(socket_servidor, (struct sockaddr *)&address,
                         (socklen_t*)&addrlen);
+        
         if (socket_cliente < 0)
         {
             perror("accept");
             exit(EXIT_FAILURE);
         }
 
+        //valread = nro de caracteres
         valread = read( socket_cliente , buffer, 1024);
 
-        printf("%s\n",buffer );
-        send(socket_cliente , hello , strlen(hello) , 0 );
+        char texto[100], palavra[100];
+        char ip[10];
+        char taxa[10];
+        int flag = 0;
+        int i;
+        char ip_cliente[50];
+        char str1[50];
+        char temp[50];
+        int contador = 0;
+        strcpy(str1, strtok(buffer, ","));
+ 		strcpy(ip_cliente, strtok(NULL, "\n"));
+
+        FILE *arquivo;
+        arquivo = fopen("info.txt", "r");
+        if(arquivo == NULL) {
+            printf("Erro ao abrir o arquivo.");
+            exit(1);
+        } else{
+            while((fgets(texto, 99, arquivo)) != NULL){
+ 			    strcpy(ip, strtok(texto, "\n"));
+                if(strcmp(ip_cliente, ip) == 0){
+                    flag = 1;
+                    fgets(palavra, 99, arquivo);
+                    strcpy(taxa, strtok(palavra, "\n"));
+                    break;
+                }
+		    }
+        }
+
+        if(flag == 1) {
+            // se  ip estiver no arquivo 
+            printf("\nIP: %s", ip_cliente);
+            printf("\nTaxa: %s kbps\n", taxa);
+        }
+        
+        if(flag == 0) {
+            printf("\nIP: %s", ip_cliente);
+            printf("\nTaxa: 1000 kbps\n");
+        }
+        
+        printf("%s\n", buffer);
+        send(socket_cliente , hello , strlen(hello) , 0);
         printf("Hello message sent\n");
         close(socket_cliente);
     }   
