@@ -20,6 +20,6 @@ Arthur Teixeira Jardim, Marcelo Marchioro Cordeiro e Rodrigo Acosta Segui.
 - FOROUZAN, Behrouz A. Redes de computadores uma abordagem top-down. 1. Porto Alegre AMGH 2013 1 recurso online ISBN 9788580551693.
 
 
-“Este projeto foi desenvolvido integralmente pela equipe, sem ajuda não autorizadade alunos não membros do projeto no processo de codificação.”
+“Este projeto foi desenvolvido integralmente pela equipe, sem ajuda não autorizada de alunos não membros do projeto no processo de codificação.”
 
 
