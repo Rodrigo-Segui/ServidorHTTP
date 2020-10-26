@@ -5,7 +5,16 @@
 
 ```
 make
+
 ```
+## Rodar Cliente
+
+```
+telnet localhost 8080
+GET "caminhoarquivo/nomearquivo HTTP/1.0
+```
+
+
 
 ## Autores
 Arthur Teixeira Jardim, Marcelo Marchioro Cordeiro e Rodrigo Acosta Segui.

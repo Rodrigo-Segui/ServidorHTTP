@@ -19,6 +19,7 @@ int main()
 
     // Variaveis socket servidor, vetor de socket de clientes
     int socket_server, socket_client[10];
+    int opt=1;
 
     // Declaraçao de porta padrao, taxa maxima, tamanho cliente
     int PORT = 8080;
@@ -48,10 +49,18 @@ int main()
     // verificacao de erro socket
     if (socket_server < 0)
     {
-        printf("\nErro! CREATE SOCKET!");
-        printf("\n-----------------\n");
-        exit(1);
+        perror("socket failed");
+        exit(EXIT_FAILURE);
     }
+
+    // Forcefully attaching socket to the port 8080
+    if (setsockopt(socket_server, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
+                                                  &opt, sizeof(opt)))
+    {
+        perror("setsockopt");
+        exit(EXIT_FAILURE);
+    }
+    
 
     bzero(&client, sizeof(client));
     client.sin_family = AF_INET;
@@ -67,18 +76,16 @@ int main()
 
     if (bind(socket_server, (struct sockaddr *)&client, LENGTH_CLIENT) == -1)
     {
-        printf("\nErro! Bind!");
-        printf("\n-----------------\n");
-        exit(1);
+        perror("bind failed");
+        exit(EXIT_FAILURE);
     }
 
     //permitir que o socket receba conexoes
     //maximo de conexoes simulaneas
     if (listen(socket_server, MAX_CONNECTIONS) == -1)
     {
-        printf("\nErro! Listen!");
-        printf("\n-----------------\n");
-        exit(1);
+       perror("ERRO listen");
+       exit(EXIT_FAILURE);
     }
 
     int clients_number = 0;
