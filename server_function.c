@@ -117,7 +117,7 @@ char *treatFileType(char *type, struct stat fileinfo)
 
     row1 = "HTTP/1.0 200 OK\r\n";
     row2 = "Connection: close\r\n";
-    row3 = "Server: Bizucaserver \r\n";
+    row3 = "Server: SERVER 2020 \r\n";
     return_info = (char *)malloc(500 * sizeof(char));
 
     sprintf(return_info, "%s%s%s%s%s%s%s%s%s%s%s%s%s", row1, row2, date, "\r\n", row3, LM, "\r\n", "Content-Length: ", size_temp, "\r\n", "Content-Type: ", temp, "\r\n\r\n");
