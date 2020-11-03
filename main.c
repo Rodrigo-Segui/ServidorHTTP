@@ -6,10 +6,12 @@
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <sys/stat.h>
+#include <pthread.h>   // for threading, link with lpthread
 #include <fcntl.h>
 #include <time.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <semaphore.h>
 #include "server_function.h"
 
 int main()
@@ -18,8 +20,10 @@ int main()
     printf("----- Servidor HTTP ------\n\n");
 
     // Variaveis socket servidor, vetor de socket de clientes
-    int socket_server, socket_client[10];
+    int socket_server, socket_client, *new_socket_client;
     int opt=1;
+
+//    sem_init(&mutex,0,1); // inicializa mutex com 1
 
     // Declaraçao de porta padrao, taxa maxima, tamanho cliente
     int PORT = 8080;
@@ -29,9 +33,7 @@ int main()
     struct sockaddr_in client;
     LENGTH_CLIENT = sizeof(client);
 
-    // ponteiro para armazenar messagem da requisicao
-    char *REQUEST_MESSAGE;
-    REQUEST_MESSAGE = (char *)malloc(LENGTH_MESSAGE * sizeof(char));
+
 
     // Informaçoes do servidor
     printf("Mensagem do Servidor | Status      : Online!\n");
@@ -92,18 +94,31 @@ int main()
 
     while (1)
     {
-        socket_client[clients_number] = accept(socket_server, (struct sockaddr *)&client, &LENGTH_CLIENT);
+        socket_client = accept(socket_server, (struct sockaddr *)&client, &LENGTH_CLIENT);
         printf("Recebeu conexão cliente: %i\n", clients_number);
-        FILE *fp = fdopen(socket_client[clients_number], "r+");
-        printf("Mensagem do Servidor | Cliente Conectado : %d \n", socket_client[clients_number]);
+
+       // pthread_t sniffer_thread; // nova thread
+        new_socket_client = (int*) malloc(1);
+        *new_socket_client = socket_client;
+        /*
+        FILE *fp = fdopen(*new_socket_client, "r+");
+        printf("Mensagem do Servidor | Cliente Conectado : %d \n", *new_socket_client);
         printf("---------------------- Aguardando Requisição ---------------------- \n");
         //LE REQUISICAO
         fgets(REQUEST_MESSAGE, LENGTH_MESSAGE, fp);
 
         // FUNCAO RESPONSAVEL POR TRATAR MENSAGEM
-        treatMessage(REQUEST_MESSAGE, fp, socket_client[clients_number]);
+        treatMessage(REQUEST_MESSAGE, fp, *new_socket_client);
         clients_number++;
         fclose(fp);
+*/
+        connetionandtreatMessage((void *)new_socket_client);
+
+        //if (pthread_create(&sniffer_thread, NULL, treatMessage, (void *)new_socket_client) < 0){ // cria uma thread para cada requisicao, passando socket novo
+        //puts("Could not create thread");
+        //return 1;
+      //}
+
     }
 
     close(socket_server);

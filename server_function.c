@@ -6,10 +6,12 @@
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <sys/stat.h>
+#include <pthread.h>   // for threading, link with lpthread
 #include <fcntl.h>
 #include <time.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <semaphore.h>
 #include "server_function.h"
 
 void sendFile(char *file_path, FILE *file_pointer, int socket, int rate)
@@ -153,8 +155,21 @@ void treatFile(char *file_path, FILE *file_point, int socket)
     printf(" \n\n");
 }
 
-void treatMessage(char *message, FILE *file_pointer, int socket)
+void *connectionandtreatMessage( void *new_sock)
 {
+    // ponteiro para armazenar messagem da requisicao
+    char *message;
+    message = (char *)malloc(LENGTH_MESSAGE * sizeof(char));
+
+    // pegar descritor do socket
+    int new_socket_client = *((int *)new_sock);
+
+    FILE *fp = fdopen(new_socket_client, "r+");
+    printf("Mensagem do Servidor | Cliente Conectado : %d \n", new_socket_client);
+    printf("---------------------- Aguardando Requisição ---------------------- \n");
+    //LE REQUISICAO
+    fgets(message, LENGTH_MESSAGE, fp);
+ 
     char *method;
     char *file_path;
     char *protocol;
@@ -177,7 +192,7 @@ void treatMessage(char *message, FILE *file_pointer, int socket)
         if (!strcmp(protocol, "HTTP/1.0\0"))
         {
             printf("-> Protocolo Aceito\n");
-            treatFile(file_path, file_pointer, socket);
+            treatFile(file_path, fp, new_socket_client);
         }
         else
         {
@@ -190,4 +205,5 @@ void treatMessage(char *message, FILE *file_pointer, int socket)
     {
         printf("\n---------------------- %s ---------------------- \n", method);
     }
+       fclose(fp);
 }

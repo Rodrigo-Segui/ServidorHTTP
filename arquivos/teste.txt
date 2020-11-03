@@ -14,3 +14,10 @@ TESTANDO SERVER
 TESTANDO SERVER
 TESTANDO SERVER
 TESTANDO SERVER
+GET /home/user/Documentos/github/ServidorHTTP/index.html HTTP/1.0
+
+GET /home/user/Documentos/github/ServidorHTTP/arquivos/imagem HTTP/1.0
+
+GET /home/user/Documentos/github/ServidorHTTP/arquivos/teste.txt HTTP/1.0
+
+
