@@ -100,19 +100,8 @@ int main()
        // pthread_t sniffer_thread; // nova thread
         new_socket_client = (int*) malloc(1);
         *new_socket_client = socket_client;
-        /*
-        FILE *fp = fdopen(*new_socket_client, "r+");
-        printf("Mensagem do Servidor | Cliente Conectado : %d \n", *new_socket_client);
-        printf("---------------------- Aguardando Requisição ---------------------- \n");
-        //LE REQUISICAO
-        fgets(REQUEST_MESSAGE, LENGTH_MESSAGE, fp);
 
-        // FUNCAO RESPONSAVEL POR TRATAR MENSAGEM
-        treatMessage(REQUEST_MESSAGE, fp, *new_socket_client);
-        clients_number++;
-        fclose(fp);
-*/
-        connetionandtreatMessage((void *)new_socket_client);
+        connectionandtreatMessage((void *)new_socket_client);
 
         //if (pthread_create(&sniffer_thread, NULL, treatMessage, (void *)new_socket_client) < 0){ // cria uma thread para cada requisicao, passando socket novo
         //puts("Could not create thread");
