@@ -14,6 +14,9 @@
 #include <semaphore.h>
 #include "server_function.h"
 
+int thread_count = 0; //contador do numero de threads ativas ao mesmo tempo
+
+
 void sendFile(char *file_path, FILE *file_pointer, int socket, int rate)
 {
     FILE *new_file_pointer;
@@ -169,6 +172,9 @@ void *connectionandtreatMessage( void *new_sock)
     printf("---------------------- Aguardando Requisição ---------------------- \n");
     //LE REQUISICAO
     fgets(message, LENGTH_MESSAGE, fp);
+
+    //sem_wait(&mutex); // lock semaphore
+    //thread_count++; // incrementa qtd de threads
  
     char *method;
     char *file_path;

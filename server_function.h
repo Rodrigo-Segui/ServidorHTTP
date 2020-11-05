@@ -1,8 +1,9 @@
 
-
 #define MAX_CONNECTIONS 3
 #define LENGTH_MESSAGE 1025
 #define USER_RATE 1
+
+
 
 //DECLARACAO DA FUNCOES
 void sendFile(char *file_path, FILE *file_pointer, int socket, int rate);

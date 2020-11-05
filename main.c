@@ -14,11 +14,13 @@
 #include <semaphore.h>
 #include "server_function.h"
 
+//sem_t mutex; // para controlar o contador de threads
+
 int main()
 {
 
     printf("----- Servidor HTTP ------\n\n");
-
+    //sem_init(&mutex, 0, 1); // Inıcializa mutex com 1.
     // Variaveis socket servidor, vetor de socket de clientes
     int socket_server, socket_client, *new_socket_client;
     int opt=1;
@@ -97,16 +99,16 @@ int main()
         socket_client = accept(socket_server, (struct sockaddr *)&client, &LENGTH_CLIENT);
         printf("Recebeu conexão cliente: %i\n", clients_number);
 
-       // pthread_t sniffer_thread; // nova thread
+        pthread_t sniffer_thread; // nova thread
         new_socket_client = (int*) malloc(1);
         *new_socket_client = socket_client;
 
-        connectionandtreatMessage((void *)new_socket_client);
+        //connectionandtreatMessage((void *)new_socket_client);
 
-        //if (pthread_create(&sniffer_thread, NULL, treatMessage, (void *)new_socket_client) < 0){ // cria uma thread para cada requisicao, passando socket novo
-        //puts("Could not create thread");
-        //return 1;
-      //}
+        if (pthread_create(&sniffer_thread, NULL, connectionandtreatMessage, (void *)new_socket_client) < 0){ // cria uma thread para cada requisicao, passando socket novo
+        puts("Could not create thread");
+        return 1;
+      }
 
     }
 
