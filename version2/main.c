@@ -19,6 +19,7 @@
 int main()
 {
     sem_init(&mutex, 0, 1); // Inıcializa mutex com 1.
+    sem_init(&mutex_rate,0,1);
     printf("----- Servidor HTTP ------\n\n");
     //sem_init(&mutex, 0, 1); // Inıcializa mutex com 1.
     // Variaveis socket servidor, socket cliente
@@ -31,7 +32,7 @@ int main()
     int LENGTH_CLIENT;
     int LENGTH_SERVER;
 
-    struct sockaddr_in server, client;
+    
     LENGTH_CLIENT = sizeof(client);
     LENGTH_CLIENT = sizeof(server);
 
@@ -120,7 +121,7 @@ int main()
 
         
 
-        if (pthread_create(&sniffer_thread, NULL, readRequest, (void *)new_socket_client) < 0){ // cria uma thread para cada requisicao, passando socket novo
+        if (pthread_create(&sniffer_thread, NULL, treatMessage, (void *)new_socket_client) < 0){ // cria uma thread para cada requisicao, passando socket novo
         puts("Could not create thread");
         return 1;
       }

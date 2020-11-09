@@ -14,10 +14,59 @@
 #include <semaphore.h>
 #include "server_function.h"
 
+int rateControl(){
+  char text[100], word[100];
+  char ip[10];
+  char taxa[10];
+  int flag = 0;
+  int i;
+  int rate = 1000;
+  char ip_cliente[50];
+  char str1[50];
+  char temp[50];
+  int contador = 0;
+  printf("%lu", client.sin_addr.s_addr);
+  char str[256];
+  sprintf(str, "%lu", client.sin_addr.s_addr);
+  printf("%s\n", str);
+ 	strcpy(ip_cliente, str);
 
+        FILE *file;
+        file = fopen("info.txt", "r");
+        if(file == NULL) {
+            printf("Erro ao abrir o arquivo.");
+            exit(1);
+        } else{
+            while((fgets(text, 99, file)) != NULL){
+ 			    strcpy(ip, strtok(text, "\n"));
+                if(strcmp(ip_cliente, ip) == 0){
+                    flag = 1;
+                    fgets(word, 99, file);
+                    strcpy(taxa, strtok(word, "\n"));
+                    break;
+                }
+		    }
+        }
 
+        if(flag == 1) {
+            // se  ip estiver no arquivo 
+            printf("\nIP: %s", ip_cliente);
+            printf("\nTaxa: %s kbps\n", taxa);
+
+            rate = atoi(strtok(taxa, "\0"));
+        }
+        
+        if(flag == 0) {
+            printf("\nIP: %s", ip_cliente);
+            printf("\nTaxa: 1000 kbps\n");
+
+        }
+        return rate;
+        }
 void sendFile(char *file_name, int socket, int rate, char *type)
 {
+
+    
     char *buffer;
     char *full_path = (char *)malloc((strlen(PATH) + strlen(file_name)) * sizeof(char));
     FILE *fp;
@@ -26,46 +75,54 @@ void sendFile(char *file_name, int socket, int rate, char *type)
     strcat(full_path, file_name);
 
     if(strcmp(type, "html")== 0){
-    fp = fopen(full_path, "r");
-    if (fp != NULL) //FILE FOUND
-    {
-        puts("File Found.");
+      fp = fopen(full_path, "r");
+      if (fp != NULL) //FILE FOUND
+      {
+          puts("File Found.");
 
-        fseek(fp, 0, SEEK_END); // tamanho do arquivo
-        long bytes_read = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
+          fseek(fp, 0, SEEK_END); // tamanho do arquivo
+          long bytes_read = ftell(fp);
+          fseek(fp, 0, SEEK_SET);
 
-        send(socket, "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n", 44, 0); // envia resposta ok 200
-        buffer = (char *)malloc(bytes_read * sizeof(char)); 
-        
-        fread(buffer, bytes_read, 1, fp); // lê o buffer
-        write (socket, buffer, bytes_read); //envia html para cliente
-        free(buffer);
-        
-        fclose(fp);
-    }
-    else //se nao encontrar arquivo
-    {
-        write(socket, "HTTP/1.0 404 Not Found\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n<!doctype html><html><body>404 File Not Found</body></html>", strlen("HTTP/1.0 404 Not Found\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n<!doctype html><html><body>404 File Not Found</body></html>"));
-    }
+          send(socket, "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n", 44, 0); // envia resposta ok 200
+          buffer = (char *)malloc(bytes_read * sizeof(char)); 
+          
+          fread(buffer, bytes_read, 1, fp); // lê o buffer
+          write (socket, buffer, bytes_read); //envia html para cliente
+          free(buffer);
+          
+          fclose(fp);
+      }
+      else //se nao encontrar arquivo
+      {
+          write(socket, "HTTP/1.0 404 Not Found\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n<!doctype html><html><body>404 File Not Found</body></html>", strlen("HTTP/1.0 404 Not Found\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n<!doctype html><html><body>404 File Not Found</body></html>"));
+      }  
 
     free(full_path);
 
     }else if(strcmp(type, "jpeg")== 0){
+          
+          sem_wait(&mutex_rate); // lock semaphore
+          int y = rateControl();
+          sem_post(&mutex_rate); // lock semaphore
+          printf("***********\n");
+          printf("%i    // RATE == ", y);
+          printf("***********\n");
+          sleep(y);
           if ((fp=open(full_path, O_RDONLY)) > 0) // se encontro imagem
-    {
-        puts("Image Found.");
-        int bytes;
-        char buffer[LENGTH_MESSAGE];
+          {
+            puts("Image Found.");
+            int bytes;
+            char buffer[LENGTH_MESSAGE];
 
-        send(socket, "HTTP/1.0 200 OK\r\nContent-Type: image/jpeg\r\n\r\n", 45, 0);
-	    while ( (bytes=read(fp, buffer, LENGTH_MESSAGE))>0 ) // lendo o arquivo do buffer
-			write (socket, buffer, bytes); // enviando jpeg para cliente
-    }
-    else // se nao encontrar arquivo entra aqui
-    {
-        write(socket, "HTTP/1.0 404 Not Found\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n<!doctype html><html><body>404 File Not Found</body></html>", strlen("HTTP/1.0 404 Not Found\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n<!doctype html><html><body>404 File Not Found</body></html>"));
-    }
+            send(socket, "HTTP/1.0 200 OK\r\nContent-Type: image/jpeg\r\n\r\n", 45, 0);
+	          while ( (bytes=read(fp, buffer, LENGTH_MESSAGE))>0 ) // lendo o arquivo do buffer
+			      write (socket, buffer, bytes); // enviando jpeg para cliente
+            }
+          else // se nao encontrar arquivo entra aqui
+          {
+          write(socket, "HTTP/1.0 404 Not Found\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n<!doctype html><html><body>404 File Not Found</body></html>", strlen("HTTP/1.0 404 Not Found\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n<!doctype html><html><body>404 File Not Found</body></html>"));
+          }
 
     free(full_path);
     close(fp);
@@ -93,12 +150,11 @@ void treatFileType(char *file_path, void *new_sock)
               char *message = "HTTP/1.0 400 Bad Request\r\nConnection: close\r\n\r\n<!doctype html><html><body>400 Bad Request. (You need to request to image and text files)</body></html>";
               write(sock, message, strlen(message));
     } else if (strcmp(extension, "html")== 0 ){
-              sem_wait(&mutex); // Evita que duas ou mais threads façam operacoes de IO ao mesmo tempo - lock semaphore
-            
+              sem_wait(&mutex); // 
               sendFile(file_path, sock,30, "html");
               sem_post(&mutex); // release semaphore
     } else if (strcmp(extension, "jpeg") == 0 ){
-              sem_wait(&mutex); // lock semaphore -- deve-se estudar aqui. Sera porque n pode ter mais de uma thread tentando escrever no socket ao mesmo tempo?
+              sem_wait(&mutex); // lock semaphore 
 
               sendFile(file_path, sock,30, "jpeg");
               sem_post(&mutex); // release semaphore
@@ -123,7 +179,7 @@ void treatFileType(char *file_path, void *new_sock)
     
 }
 
-void treatRequest(char *message, void *new_sock)
+void treatFile(char *message, void *new_sock)
 {
     printf("ENTROU READREQUEST");
    
@@ -153,7 +209,7 @@ void treatRequest(char *message, void *new_sock)
 
 }
 
-void *readRequest( void *new_sock)
+void *treatMessage( void *new_sock)
 {
     // ponteiro para armazenar messagem da requisicao
     printf("ENTROU READREQUEST");
@@ -172,7 +228,7 @@ void *readRequest( void *new_sock)
     
     // TRATA REQUISICOES
     printf("saiu READREQUEST");
-    treatRequest(message, (void *)new_sock);
+    treatFile(message, (void *)new_sock);
 
 
 
