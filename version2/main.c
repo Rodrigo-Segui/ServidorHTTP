@@ -18,7 +18,7 @@
 
 int main()
 {
-
+    sem_init(&mutex, 0, 1); // Inıcializa mutex com 1.
     printf("----- Servidor HTTP ------\n\n");
     //sem_init(&mutex, 0, 1); // Inıcializa mutex com 1.
     // Variaveis socket servidor, socket cliente
