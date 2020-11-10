@@ -109,17 +109,13 @@ int main()
         printf("----Aguardando Conexoes----- ... \n\n");
         //socket_client = accept(socket_server, (struct sockaddr *)&client, (socklen_t *)&c);
         
-        printf("CONEXAO:  %i", n_conexao);
+        printf("CONEXAO:  %i \n", n_conexao);
         n_conexao ++;
 
         pthread_t sniffer_thread; // nova thread
         new_socket_client = (int*) malloc(1);
         *new_socket_client = socket_client;
-        printf("-----------------");
-        printf("%lu", client.sin_addr.s_addr);
-        printf("-----------------");
 
-        
 ///
         if (pthread_create(&sniffer_thread, NULL, treatMessage, (void *)new_socket_client) < 0){ // cria uma thread para cada requisicao, passando socket novo
         puts("Could not create thread");

@@ -182,14 +182,13 @@ void treatFileType(char *file_path, void *new_sock)
 
 void treatFile(char *message, void *new_sock)
 {
-    printf("ENTROU READREQUEST");
    
     char *method;
     char *file_path;
 
     printf("------------------------\n");
      
-    printf("Requisição: %s", message);
+    printf("Requisição: %s \n", message);
     printf("------------------------\n");
     method = strtok(message, " \t\n"); // pega 
     printf("metodo: %s", method);
@@ -200,7 +199,7 @@ void treatFile(char *message, void *new_sock)
       puts("Method not implemented");
     }
     
-    printf("CHAMANDO FUNCAO TRATA TIPO DO ARQUIVO");
+
     treatFileType(file_path, (void *)new_sock);
  
 }
@@ -208,7 +207,6 @@ void treatFile(char *message, void *new_sock)
 void *treatMessage( void *new_sock)
 {
     // ponteiro para armazenar messagem da requisicao
-    printf("ENTROU READREQUEST");
     char message[LENGTH_MESSAGE];
     int request;
     //message = (char *)malloc(LENGTH_MESSAGE * sizeof(char));
@@ -223,7 +221,6 @@ void *treatMessage( void *new_sock)
     request =  recv(new_socket_client, message, LENGTH_MESSAGE, 0);
     
     // TRATA REQUISICOES
-    printf("saiu READREQUEST");
     treatFile(message, (void *)new_sock);
 
 
