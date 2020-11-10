@@ -120,7 +120,7 @@ int main()
         printf("-----------------");
 
         
-
+///
         if (pthread_create(&sniffer_thread, NULL, treatMessage, (void *)new_socket_client) < 0){ // cria uma thread para cada requisicao, passando socket novo
         puts("Could not create thread");
         return 1;

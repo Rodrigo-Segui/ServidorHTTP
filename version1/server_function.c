@@ -6,210 +6,155 @@
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <sys/stat.h>
-#include <pthread.h>   // for threading, link with lpthread
 #include <fcntl.h>
 #include <time.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <semaphore.h>
 #include "server_function.h"
 
-int thread_count = 0; //contador do numero de threads ativas ao mesmo tempo
 
 
-void sendFile(char *file_path, FILE *file_pointer, int socket, int rate)
+void sendFile(char *file_name, int socket, char *type)
 {
-    FILE *new_file_pointer;
-    new_file_pointer = fopen(file_path, "r+");
-    if (new_file_pointer == NULL)
-    {
-        printf("\nError! Arquivo não encontrado !");
-        printf("\n-----------------\n");
-        exit(1);
-    }
-    else
-    {
-        printf("-> Arquivo encontrado \n");
-        printf("-> Arquivo: %s \n", file_path);
-        char *buffer = (char *)malloc(rate * sizeof(char));
-        int result;
-        int total = 0;
-        int flag = 1;
-        rewind(file_pointer);
-        rewind(new_file_pointer);
-        while (flag)
-        {
-            result = fread(buffer, 1, rate, new_file_pointer);
-            sleep(1);
-            if (result <= 0)
-            {
-                flag = 0;
+
+    
+    char *buffer;
+    char *full_path = (char *)malloc((strlen(PATH) + strlen(file_name)) * sizeof(char));
+    FILE *fp;
+
+    strcpy(full_path, PATH); // 
+    strcat(full_path, file_name);
+
+    if(strcmp(type, "html")== 0){
+      fp = fopen(full_path, "r");
+      if (fp != NULL) //FILE FOUND
+      {
+          puts("File Found.");
+
+          fseek(fp, 0, SEEK_END); // tamanho do arquivo
+          long bytes_read = ftell(fp);
+          fseek(fp, 0, SEEK_SET);
+
+          send(socket, "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n", 44, 0); // envia resposta ok 200
+          buffer = (char *)malloc(bytes_read * sizeof(char)); 
+          
+          fread(buffer, bytes_read, 1, fp); // lê o buffer
+          write (socket, buffer, bytes_read); //envia html para cliente
+          free(buffer);
+          
+          fclose(fp);
+      }
+      else //se nao encontrar arquivo
+      {
+          write(socket, "HTTP/1.0 404 Not Found\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n<!doctype html><html><body>404 File Not Found</body></html>", strlen("HTTP/1.0 404 Not Found\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n<!doctype html><html><body>404 File Not Found</body></html>"));
+      }  
+
+    free(full_path);
+
+    }else if(strcmp(type, "jpeg")== 0){
+          
+          if ((fp=open(full_path, O_RDONLY)) > 0) // se encontro imagem
+          {
+            puts("Image Found.");
+            int bytes;
+            char buffer[LENGTH_MESSAGE];
+
+            send(socket, "HTTP/1.0 200 OK\r\nContent-Type: image/jpeg\r\n\r\n", 45, 0);
+	          while ( (bytes=read(fp, buffer, LENGTH_MESSAGE))>0 ) // lendo o arquivo do buffer
+			      write (socket, buffer, bytes); // enviando jpeg para cliente
             }
-            if (result > 0 && flag == 1)
-            {
-                write(socket, buffer, result);
-            }
-            total = total + result;
-        }
-        printf("\n\n ----- Aguardando uma nova conexão ------");
-        fclose(new_file_pointer);
+          else // se nao encontrar arquivo entra aqui
+          {
+          write(socket, "HTTP/1.0 404 Not Found\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n<!doctype html><html><body>404 File Not Found</body></html>", strlen("HTTP/1.0 404 Not Found\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n<!doctype html><html><body>404 File Not Found</body></html>"));
+          }
+
+    free(full_path);
+    close(fp);
+
     }
 }
 
-char *treatFileType(char *type, struct stat fileinfo)
+void treatFileType(char *file_path, void *new_sock)
 {
-    time_t rawtime;
-    struct tm *timeinfo;
-    time_t rawtime2;
-    struct tm *timeinfo2;
-    char *temp;
-    char *return_info;
 
-    if (!strcmp(type, "png\0"))
-    {
-        temp = "image/png";
-    }
-    else if (!strcmp(type, "pdf\0"))
-    {
-        temp = "application/pdf";
-    }
-    else if (!strcmp(type, "txt\0"))
-    {
-        temp = "text/txt";
-    }
-    else if (!strcmp(type, "gif\0"))
-    {
-        temp = "image/gif";
-    }
-    else if (!strcmp(type, "jpeg\0"))
-    {
-        temp = "image/jpeg";
-    }
-    else if (!strcmp(type, "jpg\0"))
-    {
-        temp = "image/jpeg";
-    }
-    else if (!strcmp(type, "html\0"))
-    {
-        temp = "text/html";
-    }
-    else if (!strcmp(type, "htm\0"))
-    {
-        temp = "text/html";
-    }
+    
+    int sock = *((int *)new_sock);
+    int rate = 1000;
+    char *extension;
+    char *name;
+    char *file_name;
+    file_name = (char *)malloc(strlen(file_path) * sizeof(char));
+    strcpy(file_name, file_path);
+    puts("****************\n");
+    puts(file_name);
+    name = strtok(file_name, "."); //nome do arquivo
+    extension = strtok(NULL, "."); // extensao
+    if (name == NULL || extension == NULL) { 
+              puts("Wrong request");
+              char *message = "HTTP/1.0 400 Bad Request\r\nConnection: close\r\n\r\n<!doctype html><html><body>400 Bad Request. (You need to request to image and text files)</body></html>";
+              write(sock, message, strlen(message));
+    } else if (strcmp(extension, "html")== 0 ){
+            sendFile(file_path, sock, "html");
+    } else if (strcmp(extension, "jpeg") == 0 ){
+             sendFile(file_path, sock,"jpeg");
+    } else { 
+              char *message = "HTTP/1.0 400 Bad Request\r\nConnection: close\r\n\r\n<!doctype html><html><body>400 Bad Request. Not Supported File Type (Suppoerted File Types: html and jpeg)</body></html>";
+              write(sock, message, strlen(message));
+    }          
+             
+    free(file_name);
+    free(new_sock);
+    close(sock); // destroi socket
+    sock = -1;
 
-    int size = fileinfo.st_size;
-    printf("-> Tamanho: %d \n", size);
-    char *size_temp = (char *)malloc(10 * sizeof(char));
-    sprintf(size_temp, "%d", size);
-    char *date = (char *)malloc(50 * sizeof(char));
-    char *LM = (char *)malloc(50 * sizeof(char));
-    char *row1;
-    char *row2;
-    char *row3;
-
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
-    strftime(date, 50, "Date: %a, %d %b %Y %X GMT\0", timeinfo);
-    printf("\n%s\n", date);
-    printf("-----------------\n");
-
-    rawtime2 = fileinfo.st_mtime;
-    timeinfo2 = localtime(&rawtime2);
-    strftime(LM, 50, "Last-Modified: %a, %d %b %Y %X GMT\0", timeinfo2);
-    printf("\n%s\n", LM);
-    printf("-----------------\n");
-
-    row1 = "HTTP/1.0 200 OK\r\n";
-    row2 = "Connection: close\r\n";
-    row3 = "Server: SERVER 2020 \r\n";
-    return_info = (char *)malloc(500 * sizeof(char));
-
-    sprintf(return_info, "%s%s%s%s%s%s%s%s%s%s%s%s%s", row1, row2, date, "\r\n", row3, LM, "\r\n", "Content-Length: ", size_temp, "\r\n", "Content-Type: ", temp, "\r\n\r\n");
-
-    return return_info;
+   
+    
 }
 
-void treatFile(char *file_path, FILE *file_point, int socket)
+void treatFile(char *message, void *new_sock)
 {
-    struct stat fileinfo;
-    char *type_file;
-    char *data;
-    int rate = 0;
+     printf("ENTROU READREQUEST");
+   
+    char *method;
+    char *file_path;
 
-    rate = (USER_RATE * 1024 * 1024);
-    data = (char *)malloc(rate * sizeof(char));
-
-    char *new_file_path = (char *)malloc(100 * sizeof(char));
-
-    strcpy(new_file_path, file_path);
-    type_file = strtok(file_path, ".");
-    type_file = strtok(NULL, "\r");
-    printf("-> Tipo Arquivo: %s \n", type_file);
-
-    data = treatFileType(type_file, fileinfo);
-    printf("-> Dados: \n\n");
-    printf("%s", data);
-    printf("\n\n-----------------\n");
-    write(socket, data, strlen(data));
-
-    sendFile(new_file_path, file_point, socket, rate);
-
-    printf(" \n\n");
+    printf("------------------------\n");
+     
+    printf("Requisição: %s", message);
+    printf("------------------------\n");
+    method = strtok(message, " \t\n"); // pega 
+    printf("metodo: %s", method);
+    if (strncmp(method, "GET\0", 4) == 0){
+        file_path = strtok(NULL, " \t"); // endereco
+    }
+    else if((strncmp(method, "POST\0", 5) == 0)){
+      puts("Method not implemented");
+    }
+    
+    printf("CHAMANDO FUNCAO TRATA TIPO DO ARQUIVO");
+    treatFileType(file_path, (void *)new_sock);
 }
 
-void *connectionandtreatMessage( void *new_sock)
+void *treatMessage( void *new_sock)
 {
     // ponteiro para armazenar messagem da requisicao
-    char *message;
-    message = (char *)malloc(LENGTH_MESSAGE * sizeof(char));
+    printf("ENTROU READREQUEST");
+    char message[LENGTH_MESSAGE];
+    int request;
+    //message = (char *)malloc(LENGTH_MESSAGE * sizeof(char));
 
     // pegar descritor do socket
     int new_socket_client = *((int *)new_sock);
 
-    FILE *fp = fdopen(new_socket_client, "r+");
     printf("Mensagem do Servidor | Cliente Conectado : %d \n", new_socket_client);
     printf("---------------------- Aguardando Requisição ---------------------- \n");
-    //LE REQUISICAO
-    fgets(message, LENGTH_MESSAGE, fp);
 
-    //sem_wait(&mutex); // lock semaphore
-    //thread_count++; // incrementa qtd de threads
- 
-    char *method;
-    char *file_path;
-    char *protocol;
+    // RECEBE REQUISICOES
+    request =  recv(new_socket_client, message, LENGTH_MESSAGE, 0);
+    
+    // TRATA REQUISICOES
+    printf("saiu READREQUEST");
+    treatFile(message, (void *)new_sock);
 
-    printf("Requisição: %s", message);
-    method = strtok(message, " ");
 
-    // TRATA REQUISICOES GET
-    if (!strcmp(message, "GET\0"))
-    {
-
-        printf("-> Método: %s \n", method);
-        file_path = strtok(NULL, " ");
-        printf("-> Arquivo: %s \n", file_path);
-        protocol = strtok(NULL, "\r");
-
-        printf("-> Protocolo: %s \n\n", protocol);
-
-        //VERIFICA SE PROTOCOLO HTTP 1.0
-        if (!strcmp(protocol, "HTTP/1.0\0"))
-        {
-            printf("-> Protocolo Aceito\n");
-            treatFile(file_path, fp, new_socket_client);
-        }
-        else
-        {
-            printf("\nError! Protocol Não Suportado!");
-            printf("\n-----------------\n");
-            exit(1);
-        }
-    }
-    else
-    {
-        printf("\n---------------------- %s ---------------------- \n", method);
-    }
-       fclose(fp);
 }

@@ -1,3 +1,4 @@
+//VERSA0 2 ---
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -102,9 +103,9 @@ void sendFile(char *file_name, int socket, int rate, char *type)
 
     }else if(strcmp(type, "jpeg")== 0){
           
-          sem_wait(&mutex_rate); // lock semaphore
+          //sem_wait(&mutex_rate); // lock semaphore
           int y = rateControl();
-          sem_post(&mutex_rate); // lock semaphore
+          //sem_post(&mutex_rate); // lock semaphore
           printf("***********\n");
           printf("%i    // RATE == ", y);
           printf("***********\n");
@@ -150,14 +151,14 @@ void treatFileType(char *file_path, void *new_sock)
               char *message = "HTTP/1.0 400 Bad Request\r\nConnection: close\r\n\r\n<!doctype html><html><body>400 Bad Request. (You need to request to image and text files)</body></html>";
               write(sock, message, strlen(message));
     } else if (strcmp(extension, "html")== 0 ){
-              sem_wait(&mutex); // 
+             // sem_wait(&mutex); // 
               sendFile(file_path, sock,30, "html");
-              sem_post(&mutex); // release semaphore
+             // sem_post(&mutex); // release semaphore
     } else if (strcmp(extension, "jpeg") == 0 ){
-              sem_wait(&mutex); // lock semaphore 
+              //sem_wait(&mutex); // lock semaphore 
 
               sendFile(file_path, sock,30, "jpeg");
-              sem_post(&mutex); // release semaphore
+              //sem_post(&mutex); // release semaphore
     } else { 
               char *message = "HTTP/1.0 400 Bad Request\r\nConnection: close\r\n\r\n<!doctype html><html><body>400 Bad Request. Not Supported File Type (Suppoerted File Types: html and jpeg)</body></html>";
               write(sock, message, strlen(message));
@@ -202,11 +203,6 @@ void treatFile(char *message, void *new_sock)
     printf("CHAMANDO FUNCAO TRATA TIPO DO ARQUIVO");
     treatFileType(file_path, (void *)new_sock);
  
-
-    
-
-
-
 }
 
 void *treatMessage( void *new_sock)

@@ -6,26 +6,23 @@
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <sys/stat.h>
-#include <pthread.h>   // for threading, link with lpthread
 #include <fcntl.h>
 #include <time.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <semaphore.h>
 #include "server_function.h"
 
-//sem_t mutex; // para controlar o contador de threads
+
 
 int main()
 {
 
     printf("----- Servidor HTTP ------\n\n");
-    //sem_init(&mutex, 0, 1); // Inıcializa mutex com 1.
+
     // Variaveis socket servidor, vetor de socket de clientes
     int socket_server, socket_client, *new_socket_client;
     int opt=1;
 
-//    sem_init(&mutex,0,1); // inicializa mutex com 1
 
     // Declaraçao de porta padrao, taxa maxima, tamanho cliente
     int PORT = 8080;
@@ -103,12 +100,9 @@ int main()
         new_socket_client = (int*) malloc(1);
         *new_socket_client = socket_client;
 
-        //connectionandtreatMessage((void *)new_socket_client);
+        treatMessage((void *)new_socket_client);
 
-        if (pthread_create(&sniffer_thread, NULL, connectionandtreatMessage, (void *)new_socket_client) < 0){ // cria uma thread para cada requisicao, passando socket novo
-        puts("Could not create thread");
-        return 1;
-      }
+    
 
     }
 
