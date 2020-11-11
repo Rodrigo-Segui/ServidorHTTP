@@ -1,17 +1,24 @@
 # Servidor HTTP
 
-
+## VERSAO 1
 ## Rodar servidor
-
 ```
 make
-
 ```
 ## Rodar Cliente
-
 ```
 telnet localhost 8080
 GET "caminhoarquivo/nomearquivo HTTP/1.0
+```
+
+## VERSAO 2
+## Rodar servidor
+```
+make
+```
+## Rodar Cliente
+```
+http://localhost:8080/brasil.html
 ```
 
 
@@ -21,6 +28,8 @@ Arthur Teixeira Jardim, Marcelo Marchioro Cordeiro e Rodrigo Acosta Segui.
 
 ## Referências
 
+- https://github.com/ozgurhepsag/Multi-threaded-HTTP-Server
+- https://github.com/eduardoveiga/ServidorHTTP
 - G, Gracioli.(2011). Sockets em C, http://www-usr.inf.ufsm.br/~giovani/sockets.html, Outubro.
 - Socket Programming in C, https://bitwordblog.wordpress.com/2017/01/17/socket-programming-in-c/, Outubro.
 - R, Lopes, (2011),  Simples servidor http com concorrência feito em C, https://www.vivaolinux.com.br/script/Simples-servidor-http-com-concorrencia-feito-em-C/, Outubro. 
