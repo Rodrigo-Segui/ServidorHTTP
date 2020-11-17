@@ -14,7 +14,7 @@
 #include <semaphore.h>
 #include "server_function.h"
 
-//sem_t mutex; // para controlar o contador de threads
+
 
 int main()
 {
@@ -93,44 +93,43 @@ int main()
 
 
     
-    int escolha = 0;
-    printf("1 - HTTP 1.0 - Conexoes nao-persistentes\n");
-    printf("2 - HTTP 1.1 - Conexoes persistentes\n");
-    printf("Escolha: ");
-    scanf("%d", &escolha);
-    printf("\n\n");
-    if(escolha == 1){
+
         printf("---------------------------------------\n");
         printf("HTTP 1.0 - Conexoes nao-persistentes\n");
         printf("---------------------------------------\n\n");
 
-    while ((socket_client = accept(socket_server, (struct sockaddr *)&client, (socklen_t *)&c))){
     
-        printf("----Aguardando Conexoes----- ... \n\n");
-        //socket_client = accept(socket_server, (struct sockaddr *)&client, (socklen_t *)&c);
-        
-        printf("CONEXAO:  %i \n", n_conexao);
-        n_conexao ++;
+
+    while (1)
+	{
+
+		// Accept connection on socket
+		if ( (socket_client = accept(socket_server,(struct sockaddr *)&client,(socklen_t *)&c)) == -1 ) {
+			perror("run_http: Error accepting connection");
+			exit(1);
+		}
+
+
 
         pthread_t sniffer_thread; // nova thread
         new_socket_client = (int*) malloc(1);
         *new_socket_client = socket_client;
 
-///
+
         if (pthread_create(&sniffer_thread, NULL, treatMessage, (void *)new_socket_client) < 0){ // cria uma thread para cada requisicao, passando socket novo
         puts("Could not create thread");
         return 1;
       }
+      
 
     }
 
+
+    printf("\né os guri pae\n");
     close(socket_server);
 
 
 
-    }else{
-        printf("AINDA NAO IMPLEMENTADO\n");
-    }
     
     return 0;
 

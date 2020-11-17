@@ -15,14 +15,14 @@
 #include <semaphore.h>
 #include "server_function.h"
 
-int rateControl(){
+int rateControl(char *ip_cliente){
   char text[100], word[100];
   char ip[10];
   char taxa[10];
   int flag = 0;
   int i;
   int rate = 1000;
-  char ip_cliente[50];
+  //char ip_cliente[50];
   char str1[50];
   char temp[50];
   int contador = 0;
@@ -62,9 +62,10 @@ int rateControl(){
             printf("\nTaxa: 1000 kbps\n");
 
         }
+        printf("TAXA %s",  rate);
         return rate;
         }
-void sendFile(char *file_name, int socket, int rate, char *type)
+void sendFile(char *file_name, int socket, int rate, char *type, char *ip)
 {
 
     
@@ -104,7 +105,7 @@ void sendFile(char *file_name, int socket, int rate, char *type)
     }else if(strcmp(type, "jpeg")== 0){
           
           //sem_wait(&mutex_rate); // lock semaphore
-          int y = rateControl();
+          int y = rateControl(ip);
           //sem_post(&mutex_rate); // lock semaphore
           printf("***********\n");
           printf("%i    // RATE == ", y);
@@ -140,6 +141,7 @@ void treatFileType(char *file_path, void *new_sock)
     char *extension;
     char *name;
     char *file_name;
+    char *ip;
     file_name = (char *)malloc(strlen(file_path) * sizeof(char));
     strcpy(file_name, file_path);
     puts("****************\n");
@@ -151,14 +153,22 @@ void treatFileType(char *file_path, void *new_sock)
               char *message = "HTTP/1.0 400 Bad Request\r\nConnection: close\r\n\r\n<!doctype html><html><body>400 Bad Request. (You need to request to image and text files)</body></html>";
               write(sock, message, strlen(message));
     } else if (strcmp(extension, "html")== 0 ){
-             // sem_wait(&mutex); // 
-              sendFile(file_path, sock,30, "html");
-             // sem_post(&mutex); // release semaphore
+              sem_wait(&mutex); // 
+              printf("PREFEITA MANUELA -----\n");
+              printf("ENTROU AQUI");
+              ip = identify(new_sock);
+              sendFile(file_path, sock,30, "html",ip);
+              printf("VOTE 65-----\n");
+              sem_post(&mutex); // release semaphore
     } else if (strcmp(extension, "jpeg") == 0 ){
-              //sem_wait(&mutex); // lock semaphore 
+             
+              sem_wait(&mutex); // lock semaphore 
+              printf("PREFEITA MANUELA -----\n");
 
-              sendFile(file_path, sock,30, "jpeg");
-              //sem_post(&mutex); // release semaphore
+              ip = identify(new_sock);
+              sendFile(file_path, sock,30, "jpeg",ip);
+              printf("  VOTE 65-----\n");
+              sem_post(&mutex); // release semaphore
     } else { 
               char *message = "HTTP/1.0 400 Bad Request\r\nConnection: close\r\n\r\n<!doctype html><html><body>400 Bad Request. Not Supported File Type (Suppoerted File Types: html and jpeg)</body></html>";
               write(sock, message, strlen(message));
@@ -170,11 +180,11 @@ void treatFileType(char *file_path, void *new_sock)
          
              
              
-    free(file_name);
-    free(new_sock);
-    shutdown(sock, SHUT_RDWR); // encerra conexao do socket
-    close(sock); // destroi socket
-    sock = -1;
+   // free(file_name);
+    //free(new_sock);
+    //shutdown(sock, SHUT_RDWR); // encerra conexao do socket
+    //close(sock); // destroi socket
+    //sock = -1;
     pthread_exit(NULL); // sai da thread
    
     
@@ -203,9 +213,30 @@ void treatFile(char *message, void *new_sock)
     treatFileType(file_path, (void *)new_sock);
  
 }
+// Identifies client (address and port) from socket
+char * identify(int socket)
+{
+	char ipstr[INET6_ADDRSTRLEN];
+	socklen_t len;
+	struct sockaddr_in *s;
+	int port;
+	struct sockaddr_storage addr;
 
+	len = sizeof addr;
+	getpeername(socket, (struct sockaddr*)&addr, &len);
+
+	// Assuming only IPv4
+	s = (struct sockaddr_in *)&addr;
+	port = ntohs(s->sin_port);
+	inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
+
+	printf("identify: received new request from %s port %d\n",ipstr,port);
+
+	return ipstr;
+}
 void *treatMessage( void *new_sock)
 {
+    //identify(new_sock);
     // ponteiro para armazenar messagem da requisicao
     char message[LENGTH_MESSAGE];
     int request;
@@ -213,6 +244,7 @@ void *treatMessage( void *new_sock)
 
     // pegar descritor do socket
     int new_socket_client = *((int *)new_sock);
+    
 
     printf("Mensagem do Servidor | Cliente Conectado : %d \n", new_socket_client);
     printf("---------------------- Aguardando Requisição ---------------------- \n");
