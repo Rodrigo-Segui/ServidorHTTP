@@ -95,7 +95,7 @@ int main()
     
 
         printf("---------------------------------------\n");
-        printf("HTTP 1.0 - Conexoes nao-persistentes\n");
+        printf("HTTP 1.1 - Conexoes persistentes\n");
         printf("---------------------------------------\n\n");
 
     

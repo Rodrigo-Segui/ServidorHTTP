@@ -26,11 +26,12 @@ int rateControl(char *ip_cliente){
   char str1[50];
   char temp[50];
   int contador = 0;
-  printf("%lu", client.sin_addr.s_addr);
-  char str[256];
-  sprintf(str, "%lu", client.sin_addr.s_addr);
-  printf("%s\n", str);
- 	strcpy(ip_cliente, str);
+//  printf("%lu", client.sin_addr.s_addr);
+//  char str[256];
+//  sprintf(str, "%lu", client.sin_addr.s_addr);
+//  printf("%s\n", str);
+ //	strcpy(ip_cliente, str);
+
 
         FILE *file;
         file = fopen("info.txt", "r");
@@ -40,6 +41,9 @@ int rateControl(char *ip_cliente){
         } else{
             while((fgets(text, 99, file)) != NULL){
  			    strcpy(ip, strtok(text, "\n"));
+                 printf("comparando ips\n");
+                 printf("%s \n", ip);
+                 printf("%s \n", ip_cliente);
                 if(strcmp(ip_cliente, ip) == 0){
                     flag = 1;
                     fgets(word, 99, file);
@@ -105,12 +109,13 @@ void sendFile(char *file_name, int socket, int rate, char *type, char *ip)
     }else if(strcmp(type, "jpeg")== 0){
           
           //sem_wait(&mutex_rate); // lock semaphore
-          int y = rateControl(ip);
+          //int y = rateControl(ip);
+          printf("\n\n kkkk %s  kkk \n\n", &ip);
           //sem_post(&mutex_rate); // lock semaphore
-          printf("***********\n");
-          printf("%i    // RATE == ", y);
-          printf("***********\n");
-          sleep(y);
+          //printf("***********\n");
+          //printf("%i    // RATE == ", y);
+          //printf("***********\n");
+          //sleep(y);
           if ((fp=open(full_path, O_RDONLY)) > 0) // se encontro imagem
           {
             puts("Image Found.");
@@ -157,6 +162,7 @@ void treatFileType(char *file_path, void *new_sock)
               printf("PREFEITA MANUELA -----\n");
               printf("ENTROU AQUI");
               ip = identify(new_sock);
+            
               sendFile(file_path, sock,30, "html",ip);
               printf("VOTE 65-----\n");
               sem_post(&mutex); // release semaphore
@@ -164,8 +170,9 @@ void treatFileType(char *file_path, void *new_sock)
              
               sem_wait(&mutex); // lock semaphore 
               printf("PREFEITA MANUELA -----\n");
-
+                /// ip  esta retornado de maneira errada -  ARRUMAR
               ip = identify(new_sock);
+              printf("\n\n lll %s kkk", ip);
               sendFile(file_path, sock,30, "jpeg",ip);
               printf("  VOTE 65-----\n");
               sem_post(&mutex); // release semaphore
@@ -214,9 +221,10 @@ void treatFile(char *message, void *new_sock)
  
 }
 // Identifies client (address and port) from socket
-char * identify(int socket)
+char* identify(int socket)
 {
 	char ipstr[INET6_ADDRSTRLEN];
+    char *ip;
 	socklen_t len;
 	struct sockaddr_in *s;
 	int port;
@@ -231,8 +239,9 @@ char * identify(int socket)
 	inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
 
 	printf("identify: received new request from %s port %d\n",ipstr,port);
+    //strcpy(ip,ipstr);
 
-	return ipstr;
+	return &ipstr;
 }
 void *treatMessage( void *new_sock)
 {
