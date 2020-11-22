@@ -147,6 +147,7 @@ void treatFileType(char *file_path, void *new_sock)
     char *name;
     char *file_name;
     char *ip;
+    char ipstr[INET6_ADDRSTRLEN];
     file_name = (char *)malloc(strlen(file_path) * sizeof(char));
     strcpy(file_name, file_path);
     puts("****************\n");
@@ -161,7 +162,7 @@ void treatFileType(char *file_path, void *new_sock)
               sem_wait(&mutex); // 
               printf("PREFEITA MANUELA -----\n");
               printf("ENTROU AQUI");
-              ip = identify(new_sock);
+              //ip = identify(new_sock);
             
               sendFile(file_path, sock,30, "html",ip);
               printf("VOTE 65-----\n");
@@ -171,9 +172,9 @@ void treatFileType(char *file_path, void *new_sock)
               sem_wait(&mutex); // lock semaphore 
               printf("PREFEITA MANUELA -----\n");
                 /// ip  esta retornado de maneira errada -  ARRUMAR
-              ip = identify(new_sock);
-              printf("\n\n lll %s kkk", ip);
-              sendFile(file_path, sock,30, "jpeg",ip);
+              identify(new_sock, ipstr);
+              printf("\n\n lll %s kkk", ipstr);
+              sendFile(file_path, sock, 30, "jpeg", ipstr);
               printf("  VOTE 65-----\n");
               sem_post(&mutex); // release semaphore
     } else { 
@@ -221,9 +222,8 @@ void treatFile(char *message, void *new_sock)
  
 }
 // Identifies client (address and port) from socket
-char* identify(int socket)
+void identify(int socket, char *ipstr)
 {
-	char ipstr[INET6_ADDRSTRLEN];
     char *ip;
 	socklen_t len;
 	struct sockaddr_in *s;
@@ -240,8 +240,6 @@ char* identify(int socket)
 
 	printf("identify: received new request from %s port %d\n",ipstr,port);
     //strcpy(ip,ipstr);
-
-	return &ipstr;
 }
 void *treatMessage( void *new_sock)
 {
