@@ -26,11 +26,6 @@ int rateControl(char *ip_cliente){
   char str1[50];
   char temp[50];
   int contador = 0;
-//  printf("%lu", client.sin_addr.s_addr);
-//  char str[256];
-//  sprintf(str, "%lu", client.sin_addr.s_addr);
-//  printf("%s\n", str);
- //	strcpy(ip_cliente, str);
 
 
         FILE *file;
@@ -69,7 +64,7 @@ int rateControl(char *ip_cliente){
         printf("TAXA %s",  rate);
         return rate;
         }
-void sendFile(char *file_name, int socket, int rate, char *type, char *ip)
+void sendFile(char *file_name, int socket, int rate, char *type, int *ip)
 {
 
     
@@ -109,8 +104,23 @@ void sendFile(char *file_name, int socket, int rate, char *type, char *ip)
     }else if(strcmp(type, "jpeg")== 0){
           
           //sem_wait(&mutex_rate); // lock semaphore
-          //int y = rateControl(ip);
-          printf("\n\n kkkk %s  kkk \n\n", &ip);
+          //char a[2];
+          //char b[3];
+          //char c[1];
+          //char d[1];
+          //sprintf(a, "%i", ip[0]);
+          //sprintf(b, "%i", ip[1]);
+          //sprintf(c, "%i", ip[2]);
+          //sprintf(d, "%i", ip[3]);
+          
+          printf("\n***%i***\n", &ip[0]);
+          //printf("\n***%i***\n", ip[1]);
+          //printf("\n***%i***\n", ip[2]);
+          //printf("\n***%i***\n", ip[3]);
+          //char Out[10];
+          //sprintf (Out, "%d%d%d%d", ip[0], ip[1], ip[2], ip[3]);
+          //printf("\n\n-----%s-----\n\n", Out);
+          // int y = rateControl("134.4.5.6");
           //sem_post(&mutex_rate); // lock semaphore
           //printf("***********\n");
           //printf("%i    // RATE == ", y);
@@ -146,7 +156,7 @@ void treatFileType(char *file_path, void *new_sock)
     char *extension;
     char *name;
     char *file_name;
-    char *ip;
+    int *ip;
     file_name = (char *)malloc(strlen(file_path) * sizeof(char));
     strcpy(file_name, file_path);
     puts("****************\n");
@@ -161,9 +171,9 @@ void treatFileType(char *file_path, void *new_sock)
               sem_wait(&mutex); // 
               printf("PREFEITA MANUELA -----\n");
               printf("ENTROU AQUI");
-              ip = identify(new_sock);
+              //ip = identify(new_sock);
             
-              sendFile(file_path, sock,30, "html",ip);
+              sendFile(file_path, sock,30, "html","de");
               printf("VOTE 65-----\n");
               sem_post(&mutex); // release semaphore
     } else if (strcmp(extension, "jpeg") == 0 ){
@@ -172,7 +182,7 @@ void treatFileType(char *file_path, void *new_sock)
               printf("PREFEITA MANUELA -----\n");
                 /// ip  esta retornado de maneira errada -  ARRUMAR
               ip = identify(new_sock);
-              printf("\n\n lll %s kkk", ip);
+              printf("\n\n lll %s     kkk", ip);
               sendFile(file_path, sock,30, "jpeg",ip);
               printf("  VOTE 65-----\n");
               sem_post(&mutex); // release semaphore
@@ -220,11 +230,12 @@ void treatFile(char *message, void *new_sock)
     treatFileType(file_path, (void *)new_sock);
  
 }
+
 // Identifies client (address and port) from socket
-char* identify(int socket)
+int* identify(int socket)
 {
-	char ipstr[INET6_ADDRSTRLEN];
     char *ip;
+    char ipstr[INET6_ADDRSTRLEN];
 	socklen_t len;
 	struct sockaddr_in *s;
 	int port;
@@ -239,9 +250,13 @@ char* identify(int socket)
 	inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
 
 	printf("identify: received new request from %s port %d\n",ipstr,port);
-    //strcpy(ip,ipstr);
+    
+    unsigned int vet[4];
 
-	return &ipstr;
+    sscanf(ipstr, "%d.%d.%d.%d", &vet[0],&vet[1],&vet[2],&vet[3]);
+    printf("%d%d%d%d", vet[0], vet[1], vet[2], vet[3]);
+    //printf("\n----%u---- : ok\n", ipAddress);
+	return vet;
 }
 void *treatMessage( void *new_sock)
 {

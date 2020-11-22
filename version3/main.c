@@ -72,7 +72,10 @@ int main()
     // 3 -tamanho em bytes das estruturas passadas no segundo argumento
 
     if (bind(socket_server, (struct sockaddr *)&server, sizeof(server)) < 0) { // vincula socket ao end e num porta especificados acima
-      puts("Binding failed");
+        perror("erro bind");
+        exit(EXIT_FAILURE);
+        close(socket_server);
+      
       return 1;
     }
     //------------------------------------------------------//
