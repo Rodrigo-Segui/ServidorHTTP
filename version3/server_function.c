@@ -109,10 +109,24 @@ void sendFile(char *file_name, int socket, int rate, char *type, int ip)
          
           int y = rateControl(ip);
          // sem_post(&mutex_rate); // lock semaphore
-          //printf("***********\n");
-          //printf("%i    // RATE == ", y);
-          //printf("***********\n");
-          sleep(y);
+  
+          sleep(y); // POR ENQUANTO ESTA COM SLEEP
+          ///////////////////////////////////////////
+          //IMPLEMENTAR ABAIXO
+          //imagine que você precisa executar uma tarefa por segundo.
+          // Se você executar essa tarefa em menos de um segundo 
+          //(Início da tarefa em t0 e final em tempo menor que t1), 
+          //vai ser necessário aguardar o próximo "slot" para início da 
+          //execução da próxima tarefa. Ou seja, é necessário controlar a 
+          //execução das tarefas para que estas iniciem a cada segundo. 
+          //Uma forma simples de fazer isso é medir o tempo gasto com a tarefa e
+          // se este for menor que um segundo, adormecer até completar um segundo.  
+          //No caso em questão, a tarefa envolve enviar uma certa quantidade de bits 
+          //para o socket a cada segundo. Ou seja, pode ser implementada computando o 
+          //tempo gasto na escrita deste conjunto de bits no socket, calcular o tempo que 
+          //falta para completar um segundo e usar uma chamada de sistema para fazer com 
+          //que a thread adormeça pelo tempo necessário e depois retome o laço de transmissão.
+
           if ((fp=open(full_path, O_RDONLY)) > 0) // se encontro imagem
           {
             puts("Image Found.");
