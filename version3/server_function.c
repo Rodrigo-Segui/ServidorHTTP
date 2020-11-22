@@ -15,14 +15,16 @@
 #include <semaphore.h>
 #include "server_function.h"
 
-int rateControl(char *ip_cliente){
+int rateControl(int ipc){
+    char ip_cliente[10];
+    sprintf(ip_cliente, "%i", ipc);
+   puts(ip_cliente);
   char text[100], word[100];
   char ip[10];
   char taxa[10];
   int flag = 0;
   int i;
-  int rate = 1000;
-  //char ip_cliente[50];
+  int rate = 3;
   char str1[50];
   char temp[50];
   int contador = 0;
@@ -36,9 +38,9 @@ int rateControl(char *ip_cliente){
         } else{
             while((fgets(text, 99, file)) != NULL){
  			    strcpy(ip, strtok(text, "\n"));
-                 printf("comparando ips\n");
-                 printf("%s \n", ip);
-                 printf("%s \n", ip_cliente);
+                // printf("comparando ips\n");
+                 //printf("%s \n", ip);
+                 //printf("%s \n", ip_cliente);
                 if(strcmp(ip_cliente, ip) == 0){
                     flag = 1;
                     fgets(word, 99, file);
@@ -50,21 +52,21 @@ int rateControl(char *ip_cliente){
 
         if(flag == 1) {
             // se  ip estiver no arquivo 
-            printf("\nIP: %s", ip_cliente);
-            printf("\nTaxa: %s kbps\n", taxa);
+            //printf("\nIP: %s", ip_cliente);
+            ///printf("\nTaxa: %s kbps\n", taxa);
 
             rate = atoi(strtok(taxa, "\0"));
         }
         
         if(flag == 0) {
-            printf("\nIP: %s", ip_cliente);
-            printf("\nTaxa: 1000 kbps\n");
+            //printf("\nIP: %s", ip_cliente);
+            //printf("\nTaxa: 1000 kbps\n");
 
         }
-        printf("TAXA %s",  rate);
-        return rate;
+        printf("\n***TAXA %i ****\n",  rate);
+        return rate;//*/
         }
-void sendFile(char *file_name, int socket, int rate, char *type, int *ip)
+void sendFile(char *file_name, int socket, int rate, char *type, int ip)
 {
 
     
@@ -104,28 +106,13 @@ void sendFile(char *file_name, int socket, int rate, char *type, int *ip)
     }else if(strcmp(type, "jpeg")== 0){
           
           //sem_wait(&mutex_rate); // lock semaphore
-          //char a[2];
-          //char b[3];
-          //char c[1];
-          //char d[1];
-          //sprintf(a, "%i", ip[0]);
-          //sprintf(b, "%i", ip[1]);
-          //sprintf(c, "%i", ip[2]);
-          //sprintf(d, "%i", ip[3]);
-          
-          printf("\n***%i***\n", &ip[0]);
-          //printf("\n***%i***\n", ip[1]);
-          //printf("\n***%i***\n", ip[2]);
-          //printf("\n***%i***\n", ip[3]);
-          //char Out[10];
-          //sprintf (Out, "%d%d%d%d", ip[0], ip[1], ip[2], ip[3]);
-          //printf("\n\n-----%s-----\n\n", Out);
-          // int y = rateControl("134.4.5.6");
-          //sem_post(&mutex_rate); // lock semaphore
+         
+          int y = rateControl(ip);
+         // sem_post(&mutex_rate); // lock semaphore
           //printf("***********\n");
           //printf("%i    // RATE == ", y);
           //printf("***********\n");
-          //sleep(y);
+          sleep(y);
           if ((fp=open(full_path, O_RDONLY)) > 0) // se encontro imagem
           {
             puts("Image Found.");
@@ -157,7 +144,7 @@ void treatFileType(char *file_path, void *new_sock)
     char *name;
     char *file_name;
 
-    int *ip;
+    int ip;
 
     file_name = (char *)malloc(strlen(file_path) * sizeof(char));
     strcpy(file_name, file_path);
@@ -173,9 +160,10 @@ void treatFileType(char *file_path, void *new_sock)
               sem_wait(&mutex); // 
               printf("PREFEITA MANUELA -----\n");
               printf("ENTROU AQUI");
-              //ip = identify(new_sock);
-            
-              sendFile(file_path, sock,30, "html","de");
+             
+              ip = identify(new_sock);
+              
+              sendFile(file_path, sock,30, "html", ip);
               printf("VOTE 65-----\n");
               sem_post(&mutex); // release semaphore
     } else if (strcmp(extension, "jpeg") == 0 ){
@@ -183,9 +171,9 @@ void treatFileType(char *file_path, void *new_sock)
               sem_wait(&mutex); // lock semaphore 
               printf("PREFEITA MANUELA -----\n");
                 /// ip  esta retornado de maneira errada -  ARRUMAR
-
+               
               ip = identify(new_sock);
-              printf("\n\n lll %s     kkk", ip);
+             
               sendFile(file_path, sock,30, "jpeg",ip);
 
               printf("  VOTE 65-----\n");
@@ -237,7 +225,7 @@ void treatFile(char *message, void *new_sock)
 
 // Identifies client (address and port) from socket
 
-int* identify(int socket)
+int identify(int socket)
 
 {
     char *ip;
@@ -257,13 +245,23 @@ int* identify(int socket)
 
 	printf("identify: received new request from %s port %d\n",ipstr,port);
 
-    
-    unsigned int vet[4];
+   // sem_wait(&mutex_ip); // lock semaphore
+   //-------------------------------------------
+    unsigned int c1,c2,c3,c4;
+    int ip_concatenado;
 
-    sscanf(ipstr, "%d.%d.%d.%d", &vet[0],&vet[1],&vet[2],&vet[3]);
-    printf("%d%d%d%d", vet[0], vet[1], vet[2], vet[3]);
-    //printf("\n----%u---- : ok\n", ipAddress);
-	return vet;
+    sscanf(ipstr, "%d.%d.%d.%d", &c1,&c2,&c3,&c4);
+    printf("%d%d%d%d", c1, c2, c3, c4);
+    char *Out;
+    sprintf (Out, "%d%d%d%d", c1, c2, c3, c4);
+    printf("\n%s", Out);
+    ip_concatenado = atoi (Out);
+    printf("\nIP final: %d", ip_concatenado);
+  
+    //---------------------------------------------------
+  //  sem_post(&mutex_ip); // lock semaphore
+
+	return ip_concatenado;
 
 }
 void *treatMessage( void *new_sock)
