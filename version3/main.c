@@ -97,10 +97,10 @@ int main()
 
     while ((socket_client = accept(socket_server, (struct sockaddr *)&client, (socklen_t *)&c))){
     
-        printf("----Aguardando Conexoes----- ... \n\n");
+        //printf("\n---- Aguardando Conexoes ----- \n\n");
         //socket_client = accept(socket_server, (struct sockaddr *)&client, (socklen_t *)&c);
         
-        printf("CONEXAO:  %i \n", n_conexao);
+        //printf("CONEXAO:  %i \n", n_conexao);
         n_conexao ++;
 
         pthread_t sniffer_thread; // nova thread
