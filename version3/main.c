@@ -27,7 +27,7 @@ int main()
     int opt=1;
 
     // Declaraçao de porta padrao, taxa maxima, tamanho cliente
-    int PORT = 8000;
+    int PORT = 8080;
     int MAX_RATE = 1000;
     int LENGTH_CLIENT;
     int LENGTH_SERVER;
@@ -99,7 +99,8 @@ int main()
     
         //printf("\n---- Aguardando Conexoes ----- \n\n");
         //socket_client = accept(socket_server, (struct sockaddr *)&client, (socklen_t *)&c);
-        
+        printf("-> Mensagem do Servidor:  ");
+        printf("*** Aguardando Requisição *** \n\n");
         //printf("CONEXAO:  %i \n", n_conexao);
         n_conexao ++;
 
