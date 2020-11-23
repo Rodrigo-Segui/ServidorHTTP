@@ -99,7 +99,8 @@ int main()
     
         //printf("\n---- Aguardando Conexoes ----- \n\n");
         //socket_client = accept(socket_server, (struct sockaddr *)&client, (socklen_t *)&c);
-        
+        printf("-> Mensagem do Servidor:  ");
+        printf("*** Aguardando Requisição *** \n\n");
         //printf("CONEXAO:  %i \n", n_conexao);
         n_conexao ++;
 
