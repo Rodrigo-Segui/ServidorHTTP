@@ -9,6 +9,7 @@ struct sockaddr_in server, client;
 #define PATH "/home/user/Documentos/github/ServidorHTTP/version2/arquivos"
 
 //DECLARACAO DA FUNCOES
+int msleep(long tms);
 int rateControl();
 void sendFile(char *file_name, int socket, int rate, char *type);
 void treatFileType(char *file_path, void *new_sock);

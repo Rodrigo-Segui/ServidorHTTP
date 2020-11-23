@@ -93,16 +93,7 @@ int main()
 
 
     
-    int escolha = 0;
-    printf("1 - HTTP 1.0 - Conexoes nao-persistentes\n");
-    printf("2 - HTTP 1.1 - Conexoes persistentes\n");
-    printf("Escolha: ");
-    scanf("%d", &escolha);
-    printf("\n\n");
-    if(escolha == 1){
-        printf("---------------------------------------\n");
-        printf("HTTP 1.0 - Conexoes nao-persistentes\n");
-        printf("---------------------------------------\n\n");
+
 
     while ((socket_client = accept(socket_server, (struct sockaddr *)&client, (socklen_t *)&c))){
     
@@ -128,9 +119,7 @@ int main()
 
 
 
-    }else{
-        printf("AINDA NAO IMPLEMENTADO\n");
-    }
+
     
     return 0;
 

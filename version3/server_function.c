@@ -1,17 +1,21 @@
-//VERSA0 2 ---
+//VERSA0 3 ---
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <sys/socket.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <ctype.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <pthread.h>   // for threading, link with lpthread
 #include <fcntl.h>
 #include <time.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <semaphore.h>
 #include "server_function.h"
 
@@ -64,6 +68,9 @@ int rateControl(){
         }
         return rate;
         }
+
+
+
 void sendFile(char *file_name, int socket, int rate, char *type)
 {
 
@@ -71,7 +78,7 @@ void sendFile(char *file_name, int socket, int rate, char *type)
     char *buffer;
     char *full_path = (char *)malloc((strlen(PATH) + strlen(file_name)) * sizeof(char));
     FILE *fp;
-
+    struct timeval  tv1, tv2;
     strcpy(full_path, PATH); // 
     strcat(full_path, file_name);
 
@@ -102,14 +109,18 @@ void sendFile(char *file_name, int socket, int rate, char *type)
     free(full_path);
 
     }else if(strcmp(type, "jpeg")== 0){
-          
+          int cont_bytes = 0;
           //sem_wait(&mutex_rate); // lock semaphore
-          int y = rateControl();
+          int taxa = rateControl();
+          int tms;
           //sem_post(&mutex_rate); // lock semaphore
           printf("***********\n");
-          printf("%i    // RATE == ", y);
+          printf("%i    // RATE == ", taxa);
           printf("***********\n");
-          sleep(y);
+          int num_y = taxa / 1024;
+          int cont_rodadas = 0;
+          double tempototal = 0;
+          printf("AQUI TEM QUE DAR 3 : %d", num_y);
           if ((fp=open(full_path, O_RDONLY)) > 0) // se encontro imagem
           {
             puts("Image Found.");
@@ -117,8 +128,32 @@ void sendFile(char *file_name, int socket, int rate, char *type)
             char buffer[LENGTH_MESSAGE];
 
             send(socket, "HTTP/1.0 200 OK\r\nContent-Type: image/jpeg\r\n\r\n", 45, 0);
-	          while ( (bytes=read(fp, buffer, LENGTH_MESSAGE))>0 ) // lendo o arquivo do buffer
-			      write (socket, buffer, bytes); // enviando jpeg para cliente
+	          while ( (bytes=read(fp, buffer, LENGTH_MESSAGE))>0 ){ // lendo o arquivo do buffer
+              cont_rodadas  = cont_rodadas + 1;
+            gettimeofday(&tv1, NULL);
+            write (socket, buffer, bytes); // enviando jpeg para cliente
+            gettimeofday(&tv2, NULL);
+            cont_bytes = cont_bytes + bytes;
+            printf ("\nTotal time RODADA = %f seconds\n", (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +(double) (tv2.tv_sec - tv1.tv_sec));
+            double tempo_de_execucao = (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 + (double) (tv2.tv_sec - tv1.tv_sec);
+            double g = 1 - tempo_de_execucao;
+            tempototal = tempo_de_execucao + tempototal;
+            printf("\ntempo de espera ate 1s de cada rodada : %f \n", g);
+              
+            if(cont_rodadas == num_y){
+                printf("ENTROU AQUI manuela");
+            double t = 1 - tempototal;
+            printf("\ntempo de espera total n rodadas ate 1s : %f \n", t);
+            sleep(1);
+            cont_rodadas = 0;
+            tempototal = 0;
+            }
+
+            printf("enviou bytes");
+                 
+			     
+            }
+            printf("numero bytes trasferidos %i: ", cont_bytes);
             }
           else // se nao encontrar arquivo entra aqui
           {
@@ -151,14 +186,14 @@ void treatFileType(char *file_path, void *new_sock)
               char *message = "HTTP/1.0 400 Bad Request\r\nConnection: close\r\n\r\n<!doctype html><html><body>400 Bad Request. (You need to request to image and text files)</body></html>";
               write(sock, message, strlen(message));
     } else if (strcmp(extension, "html")== 0 ){
-             // sem_wait(&mutex); // 
+              sem_wait(&mutex); // 
               sendFile(file_path, sock,30, "html");
-             // sem_post(&mutex); // release semaphore
+              sem_post(&mutex); // release semaphore
     } else if (strcmp(extension, "jpeg") == 0 ){
-              //sem_wait(&mutex); // lock semaphore 
+              sem_wait(&mutex); // lock semaphore 
 
               sendFile(file_path, sock,30, "jpeg");
-              //sem_post(&mutex); // release semaphore
+              sem_post(&mutex); // release semaphore
     } else { 
               char *message = "HTTP/1.0 400 Bad Request\r\nConnection: close\r\n\r\n<!doctype html><html><body>400 Bad Request. Not Supported File Type (Suppoerted File Types: html and jpeg)</body></html>";
               write(sock, message, strlen(message));
