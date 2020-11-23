@@ -15,20 +15,22 @@
 #include <semaphore.h>
 #include "server_function.h"
 
-int rateControl(int ipc){
-    char ip_cliente[10];
-    sprintf(ip_cliente, "%i", ipc);
-   puts(ip_cliente);
+int rateControl(){
   char text[100], word[100];
   char ip[10];
   char taxa[10];
   int flag = 0;
   int i;
-  int rate = 3;
+  int rate = 1000;
+  char ip_cliente[50];
   char str1[50];
   char temp[50];
   int contador = 0;
-
+  printf("%lu", client.sin_addr.s_addr);
+  char str[256];
+  sprintf(str, "%lu", client.sin_addr.s_addr);
+  printf("%s\n", str);
+ 	strcpy(ip_cliente, str);
 
         FILE *file;
         file = fopen("info.txt", "r");
@@ -38,9 +40,6 @@ int rateControl(int ipc){
         } else{
             while((fgets(text, 99, file)) != NULL){
  			    strcpy(ip, strtok(text, "\n"));
-                // printf("comparando ips\n");
-                 //printf("%s \n", ip);
-                 //printf("%s \n", ip_cliente);
                 if(strcmp(ip_cliente, ip) == 0){
                     flag = 1;
                     fgets(word, 99, file);
@@ -52,21 +51,20 @@ int rateControl(int ipc){
 
         if(flag == 1) {
             // se  ip estiver no arquivo 
-            //printf("\nIP: %s", ip_cliente);
-            ///printf("\nTaxa: %s kbps\n", taxa);
+            printf("\nIP: %s", ip_cliente);
+            printf("\nTaxa: %s kbps\n", taxa);
 
             rate = atoi(strtok(taxa, "\0"));
         }
         
         if(flag == 0) {
-            //printf("\nIP: %s", ip_cliente);
-            //printf("\nTaxa: 1000 kbps\n");
+            printf("\nIP: %s", ip_cliente);
+            printf("\nTaxa: 1000 kbps\n");
 
         }
-        printf("\n***TAXA %i ****\n",  rate);
-        return rate;//*/
+        return rate;
         }
-void sendFile(char *file_name, int socket, int rate, char *type, int ip)
+void sendFile(char *file_name, int socket, int rate, char *type)
 {
 
     
@@ -106,27 +104,12 @@ void sendFile(char *file_name, int socket, int rate, char *type, int ip)
     }else if(strcmp(type, "jpeg")== 0){
           
           //sem_wait(&mutex_rate); // lock semaphore
-         
-          int y = rateControl(ip);
-         // sem_post(&mutex_rate); // lock semaphore
-  
-          sleep(y); // POR ENQUANTO ESTA COM SLEEP
-          ///////////////////////////////////////////
-          //IMPLEMENTAR ABAIXO
-          //imagine que você precisa executar uma tarefa por segundo.
-          // Se você executar essa tarefa em menos de um segundo 
-          //(Início da tarefa em t0 e final em tempo menor que t1), 
-          //vai ser necessário aguardar o próximo "slot" para início da 
-          //execução da próxima tarefa. Ou seja, é necessário controlar a 
-          //execução das tarefas para que estas iniciem a cada segundo. 
-          //Uma forma simples de fazer isso é medir o tempo gasto com a tarefa e
-          // se este for menor que um segundo, adormecer até completar um segundo.  
-          //No caso em questão, a tarefa envolve enviar uma certa quantidade de bits 
-          //para o socket a cada segundo. Ou seja, pode ser implementada computando o 
-          //tempo gasto na escrita deste conjunto de bits no socket, calcular o tempo que 
-          //falta para completar um segundo e usar uma chamada de sistema para fazer com 
-          //que a thread adormeça pelo tempo necessário e depois retome o laço de transmissão.
-
+          int y = rateControl();
+          //sem_post(&mutex_rate); // lock semaphore
+          printf("***********\n");
+          printf("%i    // RATE == ", y);
+          printf("***********\n");
+          sleep(y);
           if ((fp=open(full_path, O_RDONLY)) > 0) // se encontro imagem
           {
             puts("Image Found.");
@@ -157,9 +140,6 @@ void treatFileType(char *file_path, void *new_sock)
     char *extension;
     char *name;
     char *file_name;
-
-    int ip;
-
     file_name = (char *)malloc(strlen(file_path) * sizeof(char));
     strcpy(file_name, file_path);
     puts("****************\n");
@@ -171,27 +151,14 @@ void treatFileType(char *file_path, void *new_sock)
               char *message = "HTTP/1.0 400 Bad Request\r\nConnection: close\r\n\r\n<!doctype html><html><body>400 Bad Request. (You need to request to image and text files)</body></html>";
               write(sock, message, strlen(message));
     } else if (strcmp(extension, "html")== 0 ){
-              sem_wait(&mutex); // 
-              printf("PREFEITA MANUELA -----\n");
-              printf("ENTROU AQUI");
-             
-              ip = identify(new_sock);
-              
-              sendFile(file_path, sock,30, "html", ip);
-              printf("VOTE 65-----\n");
-              sem_post(&mutex); // release semaphore
+             // sem_wait(&mutex); // 
+              sendFile(file_path, sock,30, "html");
+             // sem_post(&mutex); // release semaphore
     } else if (strcmp(extension, "jpeg") == 0 ){
-             
-              sem_wait(&mutex); // lock semaphore 
-              printf("PREFEITA MANUELA -----\n");
-                /// ip  esta retornado de maneira errada -  ARRUMAR
-               
-              ip = identify(new_sock);
-             
-              sendFile(file_path, sock,30, "jpeg",ip);
+              //sem_wait(&mutex); // lock semaphore 
 
-              printf("  VOTE 65-----\n");
-              sem_post(&mutex); // release semaphore
+              sendFile(file_path, sock,30, "jpeg");
+              //sem_post(&mutex); // release semaphore
     } else { 
               char *message = "HTTP/1.0 400 Bad Request\r\nConnection: close\r\n\r\n<!doctype html><html><body>400 Bad Request. Not Supported File Type (Suppoerted File Types: html and jpeg)</body></html>";
               write(sock, message, strlen(message));
@@ -203,7 +170,7 @@ void treatFileType(char *file_path, void *new_sock)
          
              
              
-   // free(file_name);
+    free(file_name);
     //free(new_sock);
     //shutdown(sock, SHUT_RDWR); // encerra conexao do socket
     //close(sock); // destroi socket
@@ -237,50 +204,8 @@ void treatFile(char *message, void *new_sock)
  
 }
 
-// Identifies client (address and port) from socket
-
-int identify(int socket)
-
-{
-    char *ip;
-    char ipstr[INET6_ADDRSTRLEN];
-	socklen_t len;
-	struct sockaddr_in *s;
-	int port;
-	struct sockaddr_storage addr;
-
-	len = sizeof addr;
-	getpeername(socket, (struct sockaddr*)&addr, &len);
-
-	// Assuming only IPv4
-	s = (struct sockaddr_in *)&addr;
-	port = ntohs(s->sin_port);
-	inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
-
-	printf("identify: received new request from %s port %d\n",ipstr,port);
-
-   // sem_wait(&mutex_ip); // lock semaphore
-   //-------------------------------------------
-    unsigned int c1,c2,c3,c4;
-    int ip_concatenado;
-
-    sscanf(ipstr, "%d.%d.%d.%d", &c1,&c2,&c3,&c4);
-    printf("%d%d%d%d", c1, c2, c3, c4);
-    char *Out;
-    sprintf (Out, "%d%d%d%d", c1, c2, c3, c4);
-    printf("\n%s", Out);
-    ip_concatenado = atoi (Out);
-    printf("\nIP final: %d", ip_concatenado);
-  
-    //---------------------------------------------------
-  //  sem_post(&mutex_ip); // lock semaphore
-
-	return ip_concatenado;
-
-}
 void *treatMessage( void *new_sock)
 {
-    //identify(new_sock);
     // ponteiro para armazenar messagem da requisicao
     char message[LENGTH_MESSAGE];
     int request;
@@ -288,7 +213,6 @@ void *treatMessage( void *new_sock)
 
     // pegar descritor do socket
     int new_socket_client = *((int *)new_sock);
-    
 
     printf("Mensagem do Servidor | Cliente Conectado : %d \n", new_socket_client);
     printf("---------------------- Aguardando Requisição ---------------------- \n");
