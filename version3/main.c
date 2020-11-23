@@ -27,7 +27,7 @@ int main()
     int opt=1;
 
     // Declaraçao de porta padrao, taxa maxima, tamanho cliente
-    int PORT = 8000;
+    int PORT = 8080;
     int MAX_RATE = 1000;
     int LENGTH_CLIENT;
     int LENGTH_SERVER;

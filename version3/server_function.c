@@ -76,6 +76,8 @@ void sendFile(char *file_name, int socket, int rate, char *type)
     char *full_path = (char *)malloc((strlen(PATH) + strlen(file_name)) * sizeof(char));
     FILE *fp;
     struct timeval  tv1, tv2;
+    struct timespec req = {0}; //estrutura da função nanosleep
+    req.tv_sec = 0; // seta a quantidade de segundos para a função nanosleep
     strcpy(full_path, PATH); 
     strcat(full_path, file_name);
 
@@ -115,6 +117,7 @@ void sendFile(char *file_name, int socket, int rate, char *type)
         int num_y = taxa / 1024;
         int cont_rodadas = 0;
         double tempototal = 0;
+        
         if ((fp=open(full_path, O_RDONLY)) > 0) // se encontro imagem
         {
             puts("\nImagem encontrada.");
@@ -140,8 +143,11 @@ void sendFile(char *file_name, int socket, int rate, char *type)
                 
                 if(cont_rodadas == num_y){
                     double t = 1 - tempototal;
-                    printf("\nTempo de espera total de %d rodadas ate 1s: %f", num_y, t);
-                    sleep(1);
+                    t = t * 1000; // transforma segundo em milisegundo
+                    int aux = (int) t; //arredonda o valor de t para inteiro
+                    req.tv_nsec = aux * 1000000L; //calcula milisegundo para nanosegundo
+                    printf("\nTempo de espera total de %d rodadas ate 1s:* %i *", num_y, aux);
+                    nanosleep(&req, (struct timespec *)NULL); //função nanosleep
                     cont_rodadas = 0;
                     tempototal = 0;
                 }     		     
