@@ -121,10 +121,16 @@ void sendFile(char *file_name, int socket, int rate, char *type)
         int tms;
           //sem_post(&mutex_rate); // lock semaphore
         printf("TAXA: %i kbps", taxa);
-        int num_y = taxa / 1024;
+        int num_y = (taxa * 0.125) / 125;
         int cont_rodadas = 0;
         double tempototal = 0;
         
+        //1 kbps  == 0,125 kBps
+        //1000 kbps == 125 KBps
+        //2000 kbps == 250 KBps
+        //3000 kbps == 375 KBps
+        //4000 kbps == 500 KBps
+        //5000 kbps == 625 KBps
         if ((fp=open(full_path, O_RDONLY)) > 0) // se encontro imagem
         {
             puts("\nImagem encontrada.\n");
@@ -133,8 +139,10 @@ void sendFile(char *file_name, int socket, int rate, char *type)
             send(socket, "HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\n\r\n", 45, 0);
             printf("HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\n\r\n");
 	        while ( (bytes=read(fp, buffer, LENGTH_MESSAGE))>0 ) { // lendo o arquivo do buffer
+                //bits = bytes * 8;
+                
                 cont_rodadas  = cont_rodadas + 1;
-
+                
                 gettimeofday(&tv1, NULL);
                 write (socket, buffer, bytes); // enviando jpeg para cliente
                 gettimeofday(&tv2, NULL);
@@ -155,8 +163,9 @@ void sendFile(char *file_name, int socket, int rate, char *type)
                     t = t * 1000; // transforma segundo em milisegundo
                     int aux = (int) t; //arredonda o valor de t para inteiro
                     req.tv_nsec = aux * 1000000L; //calcula milisegundo para nanosegundo
-                    printf("\nTempo de espera total de %d rodadas ate 1s:* %i *", num_y, aux);
+                    //printf("\nTempo de espera total de %d rodadas ate 1s:* %i *", num_y, aux);
                     nanosleep(&req, (struct timespec *)NULL); //função nanosleep
+                    printf("\n %d bits enviados em 1s", (cont_bytes_parcial * 8));
                     cont_rodadas = 0;
                     tempototal = 0;
                     cont_bytes_parcial=0;

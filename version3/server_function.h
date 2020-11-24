@@ -1,15 +1,14 @@
 
 #define MAX_CONNECTIONS 10
-#define LENGTH_MESSAGE 1024
+#define LENGTH_MESSAGE 125
 #define USER_RATE 1
 
 sem_t mutex; // para controlar o contador de threads
 sem_t mutex_rate;
 struct sockaddr_in server, client;
-#define PATH "/home/kali/Documents/ServidorHTTP/version3/arquivos/"
+#define PATH "/home/user/Documentos/github/ServidorHTTP/version3/arquivos"
 
 //DECLARACAO DA FUNCOES
-int msleep(long tms);
 int rateControl();
 void sendFile(char *file_name, int socket, int rate, char *type);
 void treatFileType(char *file_path, void *new_sock);

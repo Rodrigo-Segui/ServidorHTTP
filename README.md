@@ -21,6 +21,16 @@ make
 http://localhost:8080/brasil.html
 ```
 
+## VERSAO 3
+## Rodar servidor
+```
+make
+```
+## Rodar Cliente
+```
+http://localhost:8080/brasil.html
+```
+
 
 
 ## Autores
