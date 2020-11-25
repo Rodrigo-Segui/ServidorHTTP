@@ -10,7 +10,7 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include <pthread.h>   // for threading, link with lpthread
+#include <pthread.h>  
 #include <fcntl.h>
 #include <time.h>
 #include <sys/time.h>
@@ -65,6 +65,7 @@ int rateControl(){
     if(flag == 0) {
         printf("\nIP: %s", ip_cliente);
         printf("\nTaxa: 1000 kbps\n");
+        rate = 100000;
     }
 
     return rate;
@@ -121,7 +122,10 @@ void sendFile(char *file_name, int socket, int rate, char *type)
         int tms;
           //sem_post(&mutex_rate); // lock semaphore
         printf("TAXA: %i kbps", taxa);
+
+
         int num_y = (taxa * 0.125) / 125;
+        //1kb = 1024 bits ou 1000 bits;
         int cont_rodadas = 0;
         double tempototal = 0;
         
