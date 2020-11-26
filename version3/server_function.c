@@ -101,8 +101,12 @@ void sendFile(char *file_name, int socket, int rate, char *type)
           fread(buffer, bytes_read, 1, fp); // lê o buffer
           
           printf("\nenviando requisição...");
+          gettimeofday(&tv1, NULL);
           write (socket, buffer, bytes_read); //envia html para cliente
+          gettimeofday(&tv2, NULL);
+          double rtt_html = (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 + (double) (tv2.tv_sec - tv1.tv_sec);
           printf("\nrequisição enviada ao cliente.\n\n");
+          printf(" RTT HTML: %fs \n",rtt_html);
           free(buffer);
           
           fclose(fp);
@@ -139,6 +143,7 @@ void sendFile(char *file_name, int socket, int rate, char *type)
         {
             puts("\nImagem encontrada.\n");
             int bytes;
+            int primeiro_pacote = 1;
             char buffer[LENGTH_MESSAGE];
             send(socket, "HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\n\r\n", 45, 0);
             printf("HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\n\r\n");
@@ -159,6 +164,10 @@ void sendFile(char *file_name, int socket, int rate, char *type)
                 double tempo_de_execucao = (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 + (double) (tv2.tv_sec - tv1.tv_sec);
                 double g = 1 - tempo_de_execucao;
                 tempototal = tempo_de_execucao + tempototal;
+                if (primeiro_pacote == 1){
+                    printf(" RTT imagem: %fs \n",tempo_de_execucao);
+                    primeiro_pacote = 0;
+                }
 
                 //printf("\nTempo de espera ate 1s de cada rodada : %f \n", g);
                 
@@ -169,7 +178,7 @@ void sendFile(char *file_name, int socket, int rate, char *type)
                     req.tv_nsec = aux * 1000000L; //calcula milisegundo para nanosegundo
                     //printf("\nTempo de espera total de %d rodadas ate 1s:* %i *", num_y, aux);
                     nanosleep(&req, (struct timespec *)NULL); //função nanosleep
-                    printf("\n %d bits enviados em 1s", (cont_bytes_parcial * 8));
+                    //printf("\n %d bits enviados em 1s", (cont_bytes_parcial * 8));
                     cont_rodadas = 0;
                     tempototal = 0;
                     cont_bytes_parcial=0;
