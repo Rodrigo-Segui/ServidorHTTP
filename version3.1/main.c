@@ -16,7 +16,7 @@
 
 //sem_t mutex; // para controlar o contador de threads
 
-int main()
+int main(int argc, char *argv[])
 {
     sem_init(&mutex, 0, 1); // Inıcializa mutex com 1.
     sem_init(&mutex_rate,0,1);
@@ -27,7 +27,8 @@ int main()
     int opt=1;
 
     // Declaraçao de porta padrao, taxa maxima, tamanho cliente
-    int PORT = 8080;
+    int PORT = atoi(argv[1]);
+    int MAX_CONNECTIONS = atoi(argv[2]);
     int MAX_RATE = 1000;
     int LENGTH_CLIENT;
     int LENGTH_SERVER;
@@ -37,10 +38,11 @@ int main()
     LENGTH_CLIENT = sizeof(server);
 
     // Informaçoes do servidor
-    printf("Mensagem do Servidor | Status      : Online!\n");
-    printf("Mensagem do Servidor | Taxa Maxima : %d \n", MAX_RATE);
-    printf("Mensagem do Servidor | Porta       : %d \n\n\n\n", PORT);
-
+    printf("Mensagem do Servidor | Status       : Online!\n");
+    printf("Mensagem do Servidor | Taxa Maxima  : %d \n", MAX_RATE);
+    printf("Mensagem do Servidor | Porta        : %d \n", PORT);
+    printf("Mensagem do Servidor | Max conexões : %d \n\n\n\n", MAX_CONNECTIONS);
+    
     server.sin_family = AF_INET;
     server.sin_port = htons(PORT);
     server.sin_addr.s_addr = INADDR_ANY; // localhost

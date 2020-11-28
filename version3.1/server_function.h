@@ -1,5 +1,4 @@
 
-#define MAX_CONNECTIONS 10
 #define LENGTH_MESSAGE 125
 #define USER_RATE 1
 

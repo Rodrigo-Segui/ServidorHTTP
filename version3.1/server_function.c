@@ -269,8 +269,9 @@ void *treatMessage( void *new_sock)
             retorno_read = read(new_socket_client, message, LENGTH_MESSAGE);
             printf("retorno_read: %d", retorno_read);
             treatFile(message, (void *)new_sock);
-            if (retorno_read > 0)
+            if (retorno_read > 0) {
                 flag = 1;
+            }
             retorno_read = 0;
             printf("aaaa");
         }
