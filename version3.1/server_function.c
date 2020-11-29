@@ -45,14 +45,14 @@ int rateControl(){
         exit(1);
     } else{
         while((fgets(text, 99, file)) != NULL){
- 			strcpy(ip, strtok(text, "\n"));
+            strcpy(ip, strtok(text, "\n"));
             if(strcmp(ip_cliente, ip) == 0){
                 flag = 1;
                 fgets(word, 99, file);
                 strcpy(taxa, strtok(word, "\n"));
                     break;
             }
-		}
+        }
     }
 
     if(flag == 1) {
@@ -147,7 +147,7 @@ void sendFile(char *file_name, int socket, int rate, char *type)
             char buffer[LENGTH_MESSAGE];
             send(socket, "HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\n\r\n", 45, 0);
             printf("HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\n\r\n");
-	        while ( (bytes=read(fp, buffer, LENGTH_MESSAGE))>0 ) { // lendo o arquivo do buffer
+            while ( (bytes=read(fp, buffer, LENGTH_MESSAGE))>0 ) { // lendo o arquivo do buffer
                 //bits = bytes * 8;
                 
                 cont_rodadas  = cont_rodadas + 1;
@@ -182,7 +182,7 @@ void sendFile(char *file_name, int socket, int rate, char *type)
                     cont_rodadas = 0;
                     tempototal = 0;
                     cont_bytes_parcial=0;
-                }     		     
+                }                
             }
             //printf("\n Nº Total de bytes enviados %i: ", cont_bytes_total);
         }
@@ -260,10 +260,17 @@ void *treatMessage( void *new_sock)
     //message = (char *)malloc(LENGTH_MESSAGE * sizeof(char));
     // pegar descritor do socket
     int new_socket_client = *((int *)new_sock);
+    int readn;
 
-    read(new_socket_client, message, LENGTH_MESSAGE);
+    do{
+    int readn = read(new_socket_client, message, LENGTH_MESSAGE);
+    printf("\n****%d *****\n");
     treatFile(message, (void *)new_sock);
 
+
+    }while (readn > 0);
+   
+    printf("PRINT SAIU NO WHILE PARA FECHAR SOCKET");
     sem_wait(&mutex_timer);
 
     clock_t timer_start = clock();

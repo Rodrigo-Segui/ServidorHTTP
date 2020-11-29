@@ -6,7 +6,7 @@ sem_t mutex; // para controlar o contador de threads
 sem_t mutex_rate, mutex_timer;
 struct sockaddr_in server, client;
 
-#define PATH "/home/arthur/redes/ServidorHTTP/version3.1/arquivos/"
+#define PATH "/home/user/Documentos/github/ServidorHTTP/version3.1/arquivos"
 
 struct client {
     char ip[10];
