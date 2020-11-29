@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
 {
     sem_init(&mutex, 0, 1); // Inıcializa mutex com 1.
     sem_init(&mutex_rate,0,1);
+    sem_init(&mutex_timer, 0, 1);
     printf("----- Servidor HTTP ------\n\n");
     //sem_init(&mutex, 0, 1); // Inıcializa mutex com 1.
     // Variaveis socket servidor, socket cliente

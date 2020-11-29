@@ -256,39 +256,30 @@ void *treatMessage( void *new_sock)
     // ponteiro para armazenar messagem da requisicao
     char message[LENGTH_MESSAGE];
     int request;
+    int temp;
     //message = (char *)malloc(LENGTH_MESSAGE * sizeof(char));
-    int flag = 0;
     // pegar descritor do socket
     int new_socket_client = *((int *)new_sock);
-    int retorno_read = 0;
 
-    while(1) {
-        clock_t timer_start = clock();
-        printf("\n\n----TIMER----\n\n");
-        while(((clock() - timer_start)/CLOCKS_PER_SEC) < 10 && flag == 0){
-            retorno_read = read(new_socket_client, message, LENGTH_MESSAGE);
-            printf("retorno_read: %d", retorno_read);
-            treatFile(message, (void *)new_sock);
-            if (retorno_read > 0) {
-                flag = 1;
-            }
-            retorno_read = 0;
-            printf("aaaa");
-        }
-        clock_t timer_end = clock();
-        long timer_final = (timer_end - timer_start)/CLOCKS_PER_SEC;
-        printf("\n\nTempo final = %ld\n\n", timer_final);
-        if (flag == 0){
-            printf("\nPassa alguma vez aqui\n\n");
-            free(new_sock);
-            shutdown(new_socket_client, SHUT_RDWR);
-            close(new_socket_client);
-            new_socket_client = -1;
-            break;
-        }
-        flag = 0;
-        retorno_read = 0;
-    }
+    read(new_socket_client, message, LENGTH_MESSAGE);
+    treatFile(message, (void *)new_sock);
+
+    sem_wait(&mutex_timer);
+
+    clock_t timer_start = clock();
+    printf("\n\n----TIMER----\n");
+    while(((clock() - timer_start)/CLOCKS_PER_SEC) < 10){}
+    clock_t timer_end = clock();
+    long timer_final = (timer_end - timer_start)/CLOCKS_PER_SEC;
+    printf("\nTempo final = %lds ", timer_final);
+    free(new_sock);
+    temp = new_socket_client;
+    shutdown(new_socket_client, SHUT_RDWR);
+    close(new_socket_client);
+    new_socket_client = -1;
+    printf("| Fechou a conexão nº: %d\n", temp);
+
+    sem_post(&mutex_timer);
 
     pthread_exit(NULL);
 
