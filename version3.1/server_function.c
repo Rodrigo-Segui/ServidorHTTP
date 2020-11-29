@@ -128,7 +128,7 @@ void sendFile(char *file_name, int socket, int rate, char *type)
         printf("TAXA: %i kbps", taxa);
 
 
-        int num_y = (taxa * 0.125) / 125;
+        int num_y = (taxa * 125) / 125000;
         //1kb = 1024 bits ou 1000 bits;
         int cont_rodadas = 0;
         double tempototal = 0;
@@ -176,7 +176,7 @@ void sendFile(char *file_name, int socket, int rate, char *type)
                     t = t * 1000; // transforma segundo em milisegundo
                     int aux = (int) t; //arredonda o valor de t para inteiro
                     req.tv_nsec = aux * 1000000L; //calcula milisegundo para nanosegundo
-                    //printf("\nTempo de espera total de %d rodadas ate 1s:* %i *", num_y, aux);
+                    printf("\n %d bits enviados em 1s", (cont_bytes_parcial / 125));
                     nanosleep(&req, (struct timespec *)NULL); //função nanosleep
                     //printf("\n %d bits enviados em 1s", (cont_bytes_parcial * 8));
                     cont_rodadas = 0;
@@ -189,7 +189,7 @@ void sendFile(char *file_name, int socket, int rate, char *type)
         else {// se nao encontrar arquivo entra aqui{
             write(socket, "HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n<!doctype html><html><body>404 File Not Found</body></html>", strlen("HTTP/1.0 404 Not Found\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n<!doctype html><html><body>404 File Not Found</body></html>"));
         }
-        printf("\n Nº Total de bytes enviados %i: ", cont_bytes_total);
+        printf("\n Nº Total de bits enviados %i: ", cont_bytes_total /125);
         free(full_path);
         close(fp);
     }
