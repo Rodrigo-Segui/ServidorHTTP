@@ -97,9 +97,13 @@ int main(int argc, char *argv[])
 
     
 
-
+    char str[10];
     while ((socket_client = accept(socket_server, (struct sockaddr *)&client, (socklen_t *)&c))){
-    
+      
+        
+        
+
+        
         //printf("\n---- Aguardando Conexoes ----- \n\n");
         //socket_client = accept(socket_server, (struct sockaddr *)&client, (socklen_t *)&c);
         printf("\n-> Mensagem do Servidor:  ");
