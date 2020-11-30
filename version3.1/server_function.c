@@ -268,31 +268,15 @@ void *treatMessage( void *new_sock)
     printf("\n*****************\n");
     printf("%s", message);
     treatFile(message, (void *)new_sock);
-    //sem_wait(&mutex_timer);
 
     clock_t timer_start = clock();
-    
     while(((clock() - timer_start)/CLOCKS_PER_SEC) < 10){}
     clock_t timer_end = clock();
-    //sem_post(&mutex_timer);
-
-
-
     }while (readn > 0);
-   
-    printf("PRINT SAIU NO WHILE PARA FECHAR SOCKET");
-    
-    //long timer_final = (timer_end - timer_start)/CLOCKS_PER_SEC;
-    //printf("\nTempo final = %lds ", timer_final);
     free(new_sock);
-    //temp = new_socket_client;
     shutdown(new_socket_client, SHUT_RDWR);
     close(new_socket_client);
     new_socket_client = -1;
-    //printf("| Fechou a conexão nº: %d\n", temp);
-
-    //sem_post(&mutex_timer);
-
     pthread_exit(NULL);
 
 }
