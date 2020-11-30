@@ -18,9 +18,6 @@
 #include <sys/time.h>
 #include <semaphore.h>
 #include "server_function.h"
-#include "queue.h"
-
-
 
 int rateControl(){
     char text[100], word[100];
@@ -258,14 +255,12 @@ void treatFile(char *message, void *new_sock)
 void *treatMessage( void *new_sock)
 {
     // ponteiro para armazenar messagem da requisicao
+    sem_wait(&mutex); // 
+              num_connections ++;
+    sem_post(&mutex); // release semaphore
     char message[LENGTH_MESSAGE];
     int request;
     int temp;
-    char ipc[10];
-    int ip;
-
-    //papapa pa pa pa papapappapapa pa pa pa appapapapapapa paaaaa papapap papa pap
-
     //message = (char *)malloc(LENGTH_MESSAGE * sizeof(char));
     // pegar descritor do socket
     int new_socket_client = *((int *)new_sock);
@@ -283,20 +278,9 @@ void *treatMessage( void *new_sock)
     }while (readn > 0);
 
 
-    //RETIRA FILA AQUI RAPAX  -------
-    //MUTEX
-    sem_wait(&mutex_nconexoes); // lock semaphore 
-
-    sprintf(ipc, "%lu", client.sin_addr.s_addr);
-    ip = atoi(ipc);
-    fila_retira(f,ip);
-    printar_fila(f);
-    sem_post(&mutex_nconexoes); // release semaphore
-   
-    
-    //MUTEX
-
-
+    sem_wait(&mutex); // 
+        num_connections --;
+    sem_post(&mutex); // release semaphore
     free(new_sock);
     shutdown(new_socket_client, SHUT_RDWR);
     close(new_socket_client);

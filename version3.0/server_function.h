@@ -1,11 +1,11 @@
 
 #define LENGTH_MESSAGE 125000
-#define USER_RATE 1
 
 
 sem_t mutex; // para controlar o contador de threads
-sem_t mutex_rate, mutex_timer, mutex_nconexoes;
+sem_t mutex_rate, mutex_connection;
 struct sockaddr_in server, client;
+int num_connections;
 
 #define PATH "/home/user/Documentos/github/ServidorHTTP/version3.1/arquivos"
 

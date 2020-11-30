@@ -13,17 +13,13 @@
 #include <sys/stat.h>
 #include <semaphore.h>
 #include "server_function.h"
-#include "queue.h"
 
 //sem_t mutex; // para controlar o contador de threads
 
-int main(int argc, char *argv[])
+int main()
 {
-    f = fila_cria();
     sem_init(&mutex, 0, 1); // Inıcializa mutex com 1.
     sem_init(&mutex_rate,0,1);
-    sem_init(&mutex_timer, 0, 1);
-    sem_init(&mutex_nconexoes,0,1);
     printf("----- Servidor HTTP ------\n\n");
     //sem_init(&mutex, 0, 1); // Inıcializa mutex com 1.
     // Variaveis socket servidor, socket cliente
@@ -31,8 +27,7 @@ int main(int argc, char *argv[])
     int opt=1;
 
     // Declaraçao de porta padrao, taxa maxima, tamanho cliente
-    int PORT = atoi(argv[1]);
-    int MAX_CONNECTIONS = atoi(argv[2]);
+    int PORT = 8080;
     int MAX_RATE = 1000;
     int LENGTH_CLIENT;
     int LENGTH_SERVER;
@@ -42,11 +37,10 @@ int main(int argc, char *argv[])
     LENGTH_CLIENT = sizeof(server);
 
     // Informaçoes do servidor
-    printf("Mensagem do Servidor | Status       : Online!\n");
-    printf("Mensagem do Servidor | Taxa Maxima  : %d \n", MAX_RATE);
-    printf("Mensagem do Servidor | Porta        : %d \n", PORT);
-    printf("Mensagem do Servidor | Max conexões : %d \n\n\n\n", MAX_CONNECTIONS);
-    
+    printf("Mensagem do Servidor | Status      : Online!\n");
+    printf("Mensagem do Servidor | Taxa Maxima : %d \n", MAX_RATE);
+    printf("Mensagem do Servidor | Porta       : %d \n\n\n\n", PORT);
+
     server.sin_family = AF_INET;
     server.sin_port = htons(PORT);
     server.sin_addr.s_addr = INADDR_ANY; // localhost
@@ -97,51 +91,31 @@ int main(int argc, char *argv[])
     int n_conexao = 1;
     c = sizeof(struct sockaddr_in);
 
-    
+
     
 
-    char ipc[10];
-    int ip;
+
     while ((socket_client = accept(socket_server, (struct sockaddr *)&client, (socklen_t *)&c))){
-      
-        sprintf(ipc, "%lu", client.sin_addr.s_addr);
-        ip = atoi(ipc);
-        printf("\nENDERECO IP: %i\n", ip);
-         
-       
-        fila_insere_atualiza(f, ip);
-        printf("\n****************\n");
-        printar_fila(f);
-        int qtd = qts_clientes(f);
-        printf("\nQUANTIDADE DE CLIENTE NESSA FILA AI %d\n", qtd);
-        sem_post(&mutex_nconexoes); // release semaphore
-
     
-        if(qtd < MAX_CONNECTIONS){
         //printf("\n---- Aguardando Conexoes ----- \n\n");
         //socket_client = accept(socket_server, (struct sockaddr *)&client, (socklen_t *)&c);
-        printf("\n-> Mensagem do Servidor:  ");
+        printf("-> Mensagem do Servidor:  ");
         printf("*** Aguardando Requisição *** \n\n");
+        //printf("CONEXAO:  %i \n", n_conexao);
+        n_conexao ++;
 
-        
-        printf("\nSocket_client: %d\n", socket_client);
         pthread_t sniffer_thread; // nova thread
         new_socket_client = (int*) malloc(1);
         *new_socket_client = socket_client;
-        if (pthread_create(&sniffer_thread, NULL, treatMessage, (void *)new_socket_client) < 0){ 
-        // cria uma thread para cada conexao, passando socket novo
+
+///
+        if (pthread_create(&sniffer_thread, NULL, treatMessage, (void *)new_socket_client) < 0){ // cria uma thread para cada requisicao, passando socket novo
         puts("Could not create thread");
         return 1;
       }
 
-    }else{
-      printf("Numero de Clientes no Maximo, tente se conectar mais tarde..");
     }
-     printf("PRINTANDO A FILA");
-    printar_fila(f);
 
-    }
- 
     close(socket_server);
 
 

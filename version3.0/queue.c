@@ -13,7 +13,6 @@
 #include <sys/stat.h>
 #include <semaphore.h>
 #include "server_function.h"
-#include "queue.h"
 
 Queue *fila_cria() {
     Queue *f = (Queue*) malloc(sizeof(Queue));
@@ -21,12 +20,12 @@ Queue *fila_cria() {
     return f;
 }
 
-void fila_insere_atualiza (Queue *f, int ip) {
+void fila_insere_atualiza (Queue *f, char *ip) {
     int flag = 0;
     
     Client *temp;
     for(temp = f->ini; temp != NULL; temp = temp->prox) {
-        if(temp->ip ==  ip) {
+        if(strcmp(temp->ip, ip) == 0) {
             temp->qtde = temp->qtde + 1;
             flag = 1;
         }
@@ -34,8 +33,7 @@ void fila_insere_atualiza (Queue *f, int ip) {
 
     if(flag == 0) {
         Client *novo = (Client*) malloc(sizeof(Client));
-        novo->ip = ip;
-        //strcpy(novo->ip, ip);
+        strcpy(novo->ip, ip);
         novo->qtde = 1;
         novo->prox = NULL;
         if(f->fim == NULL && f->ini == NULL) {
@@ -49,32 +47,20 @@ void fila_insere_atualiza (Queue *f, int ip) {
     }
 }
 
-char *fila_retira(Queue *f, int ip) {
-    Client *a = NULL;
-    Client *p = f->ini;
-
-    while(p != NULL && p->ip != ip) {
-        a = p;
-        p = p->prox;
+char *fila_retira(Queue *f) {
+    Client *c;
+    char ip[10];
+    if (f->fim == NULL && f->ini == NULL) {
+        printf("Fila vazia!\n");
+        exit(1);
     }
-    if(p == NULL)
-        return f;
-    
-    if(a == NULL){ //retrura elemento
-        p->qtde --;
-        if(p->qtde == 0){
-            f = p->prox;
-        }
-    }
-    else {
-        p->qtde --;
-        if(p->qtde == 0){
-            f = p->prox;
-            a->prox = p->prox;
-        }
-    }
-    free(p);
-    return f;
+    c = f->ini;
+    strcpy(ip, c->ip);
+    f->ini = c->prox;
+    if(f->ini == NULL)
+        f->fim = NULL;
+    free(c);
+    return ip;
 }
 
 void fila_libera (Queue *f) {
@@ -85,20 +71,4 @@ void fila_libera (Queue *f) {
         c = t;
     }
     free(f);
-}
-
-void printar_fila(Queue *f) {
-    Client *temp;
-    for(temp = f->ini; temp != NULL; temp = temp->prox) {
-        printf("\nIp: %d\n", temp->ip);
-        printf("Nº de conexões: %d\n", temp->qtde);
-    }
-}
-int qts_clientes(Queue *f){
-     int qtd = 0;
-     Client *temp;
-    for(temp = f->ini; temp != NULL; temp = temp->prox) {
-        qtd= qtd +1;
-    }
-    return qtd;
 }
