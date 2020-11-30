@@ -25,6 +25,7 @@ http://localhost:8080/brasil.html
 ## Rodar servidor
 ```
 make
+./exec PORTA MAX_NUMERO_CONEXOES_CLIENTES
 ```
 ## Rodar Cliente
 ```
