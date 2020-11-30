@@ -125,7 +125,7 @@ void sendFile(char *file_name, int socket, int rate, char *type)
         int taxa = rateControl();
         int tms;
           //sem_post(&mutex_rate); // lock semaphore
-        printf("TAXA: %i kbps", taxa);
+       // printf("TAXA: %i kbps", taxa);
 
 
         int num_y = (taxa * 125) / 125000;
@@ -133,8 +133,8 @@ void sendFile(char *file_name, int socket, int rate, char *type)
         int cont_rodadas = 0;
         double tempototal = 0;
         
-        //1 kbps  == 0,125 kBps
-        //1000 kbps == 125 KBps
+        //1 kbps  == 0,125 kBps = 125 bytes
+        //1000 kbps == 125 KBps = 
         //2000 kbps == 250 KBps
         //3000 kbps == 375 KBps
         //4000 kbps == 500 KBps
@@ -176,20 +176,21 @@ void sendFile(char *file_name, int socket, int rate, char *type)
                     t = t * 1000; // transforma segundo em milisegundo
                     int aux = (int) t; //arredonda o valor de t para inteiro
                     req.tv_nsec = aux * 1000000L; //calcula milisegundo para nanosegundo
-                    printf("\n %d bits enviados em 1s", (cont_bytes_parcial / 125));
+                    printf("\n %d kbits enviados em 1s", (cont_bytes_parcial  / 125));
                     nanosleep(&req, (struct timespec *)NULL); //função nanosleep
                     //printf("\n %d bits enviados em 1s", (cont_bytes_parcial * 8));
                     cont_rodadas = 0;
                     tempototal = 0;
                     cont_bytes_parcial=0;
-                }                
+                }  
+                printf("\n");             
             }
             //printf("\n Nº Total de bytes enviados %i: ", cont_bytes_total);
         }
         else {// se nao encontrar arquivo entra aqui{
             write(socket, "HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n<!doctype html><html><body>404 File Not Found</body></html>", strlen("HTTP/1.0 404 Not Found\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n<!doctype html><html><body>404 File Not Found</body></html>"));
         }
-        printf("\n Nº Total de bits enviados %i: ", cont_bytes_total /125);
+        printf("\n Nº Total de kbits enviados %i: \n", cont_bytes_total / 125);
         free(full_path);
         close(fp);
     }
@@ -234,9 +235,9 @@ void treatFile(char *message, void *new_sock)
     char *method;
     char *file_path;
 
-    printf("------------------------\n");
+    printf("\n\n");
      
-    printf("Requisição: %s \n", message);
+    //printf("Requisição: %s \n", message);
     method = strtok(message, " \t\n"); // pega 
     printf("Metodo: %s\n", method);
     if (strncmp(method, "GET\0", 4) == 0){
@@ -264,15 +265,16 @@ void *treatMessage( void *new_sock)
 
     do{
     int readn = read(new_socket_client, message, LENGTH_MESSAGE);
-    printf("\n****%d *****\n");
+    printf("\n*****************\n");
+    printf("%s", message);
     treatFile(message, (void *)new_sock);
-    sem_wait(&mutex_timer);
+    //sem_wait(&mutex_timer);
 
     clock_t timer_start = clock();
-    printf("\n\n----TIMER----\n");
-    while(((clock() - timer_start)/CLOCKS_PER_SEC) < 5){}
+    
+    while(((clock() - timer_start)/CLOCKS_PER_SEC) < 10){}
     clock_t timer_end = clock();
-    sem_post(&mutex_timer);
+    //sem_post(&mutex_timer);
 
 
 
