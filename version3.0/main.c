@@ -28,7 +28,9 @@ int main(int argc, char *argv[])
 
     // Declaraçao de porta padrao, taxa maxima, tamanho cliente
     int PORT = atoi(argv[1]);
-    int MAX_CONNECTIONS = atoi(argv[2]);
+    
+    int MAX_VAZAO = atoi(argv[2]);
+    int MAX_CONNECTIONS = 10;
     int MAX_RATE = 1000;
     int LENGTH_CLIENT;
     int LENGTH_SERVER;
@@ -41,7 +43,7 @@ int main(int argc, char *argv[])
     printf("Mensagem do Servidor | Status       : Online!\n");
     printf("Mensagem do Servidor | Taxa Maxima  : %d \n", MAX_RATE);
     printf("Mensagem do Servidor | Porta        : %d \n", PORT);
-    printf("Mensagem do Servidor | Max conexões : %d \n\n\n\n", MAX_CONNECTIONS);
+    printf("Mensagem do Servidor | Max Vazao : %d \n\n\n\n", MAX_VAZAO);
     
     server.sin_family = AF_INET;
     server.sin_port = htons(PORT);
@@ -100,7 +102,7 @@ int main(int argc, char *argv[])
     while ((socket_client = accept(socket_server, (struct sockaddr *)&client, (socklen_t *)&c))){
       
         
-        if(num_connections < MAX_CONNECTIONS){
+        if(num_taxa_total < MAX_VAZAO){
 
         
         //printf("\n---- Aguardando Conexoes ----- \n\n");
@@ -123,7 +125,7 @@ int main(int argc, char *argv[])
 
         }else{
 
-          printf("Numero de conexoes de clientes no maximo, tente mais tarde");
+          printf("Numero taxa maxima, tente mais tarde");
         }
 
     }

@@ -5,9 +5,9 @@
 sem_t mutex; // para controlar o contador de threads
 sem_t mutex_rate, mutex_connection;
 struct sockaddr_in server, client;
-int num_connections;
+int num_taxa_total;
 
-#define PATH "/home/user/Documentos/github/ServidorHTTP/version3.1/arquivos"
+#define PATH "/home/user/Documentos/github/ServidorHTTP/version3.0/arquivos"
 
 //DECLARACAO DA FUNCOES
 int rateControl();

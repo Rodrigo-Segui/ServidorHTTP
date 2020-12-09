@@ -65,7 +65,7 @@ int rateControl(){
     if(flag == 0) {
         printf("\nIP: %s", ip_cliente);
         printf("\nTaxa: 1000 kbps\n");
-        rate = 100000;
+        rate = 1000;
     }
 
     return rate;
@@ -223,7 +223,7 @@ void treatFileType(char *file_path, void *new_sock)
               sendFile(file_path, sock,30, "jpeg");
               sem_post(&mutex); // release semaphore
     } else { 
-              char *message = "HTTP/1.0 400 Bad Request\r\nConnection: close\r\n\r\n<!doctype html><html><body>400 Bad Request. Not Supported File Type (Suppoerted File Types: html and jpeg)</body></html>";
+              char *message = "HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n<!doctype html><html><body>400 Bad Request. Not Supported File Type (Suppoerted File Types: html and jpeg)</body></html>";
               write(sock, message, strlen(message));
     }           
     free(file_name);
@@ -255,9 +255,10 @@ void treatFile(char *message, void *new_sock)
 void *treatMessage( void *new_sock)
 {
     // ponteiro para armazenar messagem da requisicao
-    sem_wait(&mutex); // 
-              num_connections ++;
-    sem_post(&mutex); // release semaphore
+    sem_wait(&mutex_connection); // 
+              num_taxa_total = num_taxa_total + (rateControl());
+              printf("rate control = %i", num_taxa_total);
+    sem_post(&mutex_connection); // release semaphore
     char message[LENGTH_MESSAGE];
     int request;
     int temp;
@@ -272,15 +273,19 @@ void *treatMessage( void *new_sock)
     printf("%s", message);
     treatFile(message, (void *)new_sock);
 
-    clock_t timer_start = clock();
-    while(((clock() - timer_start)/CLOCKS_PER_SEC) < 10){}
-    clock_t timer_end = clock();
+   // clock_t timer_start = clock();
+   // while(((clock() - timer_start)/CLOCKS_PER_SEC) < 10){}
+   // clock_t timer_end = clock();
+
+    
     }while (readn > 0);
 
 
-    sem_wait(&mutex); // 
-        num_connections --;
-    sem_post(&mutex); // release semaphore
+    // ponteiro para armazenar messagem da requisicao
+    sem_wait(&mutex_connection); // 
+              num_taxa_total = num_taxa_total - (rateControl());
+              printf("rate control = %i", num_taxa_total);
+    sem_post(&mutex_connection); // release semaphore
     free(new_sock);
     shutdown(new_socket_client, SHUT_RDWR);
     close(new_socket_client);
